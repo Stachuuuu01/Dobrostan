@@ -146,11 +146,57 @@
         alert('Dziękujemy za oddanie głosu!');
         location.reload();
     }
+<script>
+    // Funkcja logowania dla ucznia (Kody z tabel klasowych)
+    async function handleLogin() {
+        const klasa = document.getElementById('klasa').value;
+        const grupa = document.getElementById('grupa').value;
+        const kod = document.getElementById('kod').value;
+        const tabela = klasa + grupa; // np. 1TEG1
 
-    function handleAdminLogin() {
-        // Logika admina wymagałaby osobnej podstrony stats.html
-        alert('Panel statystyk dostępny w osobnej sekcji Cloudflare.');
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            body: JSON.stringify({ tabela, kod })
+        });
+
+        if(res.ok) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('vote-screen').style.display = 'block';
+            window.currentUser = { tabela, kod };
+        } else {
+            alert('Błędny kod dla klasy ' + tabela);
+        }
     }
+
+    // TA FUNKCJA BYŁA PROBLEMEM - TERAZ JEST POPRAWIONA
+    async function handleAdminLogin() {
+        const user = document.getElementById('admin_user').value;
+        const pass = document.getElementById('admin_pass').value;
+
+        const res = await fetch('/api/admin_login', {
+            method: 'POST',
+            body: JSON.stringify({ user, pass })
+        });
+
+        if(res.ok) {
+            // Przekierowanie do panelu statystyk
+            window.location.href = '/stats.html';
+        } else {
+            alert('Błędny login lub hasło administratora!');
+        }
+    }
+
+    async function vote(nastroj) {
+        const res = await fetch('/api/vote', {
+            method: 'POST',
+            body: JSON.stringify({ ...window.currentUser, nastroj })
+        });
+        if(res.ok) {
+            alert('Dziękujemy za głos!');
+            location.reload();
+        }
+    }
+</script>
 </script>
 </body>
 </html>
