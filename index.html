@@ -94,7 +94,6 @@
     © 2026 Dobrostan dla ZSTiO Jarosław. <br>
     Zaprojektowane i stworzone przez: <strong>Stanisław Słabicki</strong>.
 </footer>
-
 <script>
     const CONFIG = {'1':['TE','TG','TI','TM','TP','TS' ,'BS','BK'],'2':['TE','TI','TP','TS','BK','BS'],'3':['TA','TE','TI','TM','TP','TS','BK','BS'],'4':['TE','TG','TI','TM','TP','TS','TT'],'5':['TE','TG','TI','TP','TS']};
     let currentTable = "";
@@ -138,6 +137,7 @@
         const kod = document.getElementById('user_code').value;
         const res = await fetch('/api/login', {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' }, // TEGO BRAKOWAŁO
             body: JSON.stringify({ tabela: currentTable, kod: kod })
         });
         if(res.ok) {
@@ -153,9 +153,15 @@
     async function sendVote(mood) {
         const res = await fetch('/api/vote', {
             method: 'POST',
-            body: JSON.stringify({ ...userAuth, nastroj: mood })
+            headers: { 'Content-Type': 'application/json' }, // TEGO BRAKOWAŁO
+            body: JSON.stringify({ nastroj: mood, tabela: currentTable }) // Uproszczone pod tabelę 'Wyniki'
         });
-        if(res.ok) { alert('Dziękujemy za głos!'); location.reload(); }
+        if(res.ok) { 
+            alert('Dziękujemy za głos!'); 
+            location.reload(); 
+        } else {
+            alert('Błąd zapisu głosu. Sprawdź tabelę Wyniki.');
+        }
     }
 
     async function handleAdminLogin() {
@@ -173,7 +179,6 @@
             if (res.ok) {
                 window.location.href = '/stats.html';
             } else {
-                // TUTAJ ZOBACZYSZ DOKŁADNY BŁĄD, JEŚLI WGRASZ POPRAWIONY KOD ADMIN_LOGIN.JS
                 alert('BŁĄD: ' + (data.error || "Nieznany błąd logowania"));
             }
         } catch (e) {
