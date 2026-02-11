@@ -1,25 +1,31 @@
 export async function onRequestGet(context) {
   try {
-    const db = context.env.baza; // Twoja nazwa bindingu
+    const db = context.env.baza;
+    const { searchParams } = new URL(context.request.url);
+    const filter = searchParams.get('filter') || 'all';
 
-    // Pobieramy dane z Twojej tabeli 'Wyniki'
-    const data = await db.prepare(`
-      SELECT 
-        COUNT(*) as suma,
-        SUM(CASE WHEN nastroj = 'dobrze' THEN 1 ELSE 0 END) as dobrze,
-        SUM(CASE WHEN nastroj = 'zle' THEN 1 ELSE 0 END) as zle,
-        SUM(CASE WHEN nastroj = 'fatalnie' THEN 1 ELSE 0 END) as fatalnie
-      FROM Wyniki
-    `).first();
+    let query = "SELECT nastroj, COUNT(*) as count FROM Wyniki";
+    let params = [];
 
-    const result = {
-      suma: data.suma || 0,
-      dobrze: data.suma ? Math.round((data.dobrze / data.suma) * 100) : 0,
-      zle: data.suma ? Math.round((data.zle / data.suma) * 100) : 0,
-      fatalnie: data.suma ? Math.round((data.fatalnie / data.suma) * 100) : 0
-    };
+    // Używamy kolumny 'kto' zamiast 'klasa'
+    if (filter !== 'all') {
+      query += " WHERE kto = ?";
+      params.push(filter);
+    }
 
-    return new Response(JSON.stringify(result), {
+    query += " GROUP BY nastroj";
+
+    const results = await db.prepare(query).bind(...params).all();
+    
+    // Tworzymy obiekt z wynikami, upewniając się, że nazwy nastrojów pasują (dobrze, zle, fatalnie)
+    const stats = { dobrze: 0, zle: 0, fatalnie: 0 };
+    results.results.forEach(row => {
+      if (stats.hasOwnProperty(row.nastroj)) {
+        stats[row.nastroj] = row.count;
+      }
+    });
+
+    return new Response(JSON.stringify(stats), {
       headers: { "Content-Type": "application/json" }
     });
   } catch (err) {
