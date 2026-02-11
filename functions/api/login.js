@@ -1,16 +1,21 @@
 export async function onRequestPost(context) {
-    const { request, env } = context;
-    const { table, code } = await request.json();
+  try {
+    const { tabela, kod } = await context.request.json();
 
-    // Zabezpieczenie przed SQL Injection - dopuszczamy tylko znane tabele
-    const allowedTable = table.replace(/[^a-zA-Z0-9_]/g, '');
-    
-    const result = await env.DB.prepare(`SELECT * FROM "${allowedTable}" WHERE kod = ?`)
-        .bind(code)
-        .first();
+    // Dynamicznie wybieramy tabelę (np. 1TEG1 lub Nauczyciele)
+    // UWAGA: kod musi być w kolumnie o nazwie 'kod'
+    const { results } = await context.env.baza.prepare(
+      `SELECT * FROM ${tabela} WHERE kod = ?`
+    )
+    .bind(kod)
+    .all();
 
-    if (result) {
-        return new Response(JSON.stringify({ success: true }), { status: 200 });
+    if (results && results.length > 0) {
+      return new Response(JSON.stringify({ success: true }), { status: 200 });
+    } else {
+      return new Response(JSON.stringify({ error: "Błędny kod" }), { status: 401 });
     }
-    return new Response(JSON.stringify({ success: false }), { status: 401 });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+  }
 }
