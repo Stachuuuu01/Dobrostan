@@ -1,9 +1,13 @@
 export async function onRequestPost(context) {
   try {
     const { nastroj, tabela } = await context.request.json();
-    const db = context.env.baza; // Twoja nazwa bindingu
+    const db = context.env.baza; 
 
-    // Zwróć uwagę na 'Wyniki' - musi być z dużej litery jak na screenie!
+    if (!db) {
+      return new Response(JSON.stringify({ error: "Brak połączenia z bazą 'baza'" }), { status: 500 });
+    }
+
+    // Używamy nazwy 'Wyniki' zgodnie z Twoim screenem
     await db.prepare(
       "INSERT INTO Wyniki (nastroj, klasa, data) VALUES (?, ?, ?)"
     )
