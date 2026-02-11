@@ -3,13 +3,9 @@ export async function onRequestPost(context) {
     const { nastroj, tabela } = await context.request.json();
     const db = context.env.baza; 
 
-    if (!db) {
-      return new Response(JSON.stringify({ error: "Brak połączenia z bazą 'baza'" }), { status: 500 });
-    }
-
-    // Używamy nazwy 'Wyniki' zgodnie z Twoim screenem
+    // Poprawione nazwy kolumn: kto, data_dodania
     await db.prepare(
-      "INSERT INTO Wyniki (nastroj, klasa, data) VALUES (?, ?, ?)"
+      "INSERT INTO Wyniki (nastroj, kto, data_dodania) VALUES (?, ?, ?)"
     )
     .bind(nastroj, tabela, new Date().toISOString())
     .run();
