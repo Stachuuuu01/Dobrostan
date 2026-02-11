@@ -3,187 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ankieta - ZSTiO Jarosław</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Dobrostan - ZSTiO</title>
     <style>
-        :root { --primary: #dc3545; --bg: #000; --card-bg: #1a1a1a; --text: #fff; --teacher: #6f42c1; --success: #28a745; --warning: #ffc107; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; margin: 0; min-height: 100vh; overflow-x: hidden; }
-        .header { background: #111; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); box-sizing: border-box; box-shadow: 0 5px 15px rgba(220, 53, 69, 0.2); }
-        .logo-img { height: 60px; cursor: pointer; transition: transform 0.3s; }
-        .logo-img:hover { transform: scale(1.05); }
-        .card { background: var(--card-bg); padding: 40px; border-radius: 25px; width: 95%; max-width: 900px; text-align: center; margin-top: 30px; border: 1px solid #333; box-shadow: 0 15px 40px rgba(0,0,0,0.7); position: relative; }
-        .btn-wybor { padding: 18px 28px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 6px 12px rgba(0,0,0,0.4); }
-        .btn-wybor:hover { transform: translateY(-8px); filter: brightness(1.2); box-shadow: 0 12px 25px rgba(220, 53, 69, 0.4); }
-        .quote-box { font-weight: bold; font-size: 1.6rem; margin: 25px 0; background: linear-gradient(270deg, #ff7e5f, #feb47b, #86e3ce, #d0e6a5, #ffdd94, #ff7e5f); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientMove 8s ease infinite; text-shadow: 0 2px 10px rgba(255,255,255,0.1); }
-        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 30px; }
-        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); display:none; justify-content:center; align-items:center; z-index:999; backdrop-filter: blur(5px); }
-        .hidden { display: none; }
-        input { width: 85%; padding: 15px; margin: 15px 0; border-radius: 10px; background: #2a2a2a; color: white; border: 1px solid #444; text-align: center; font-size: 1.1rem; outline: none; transition: 0.3s; }
-        footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-align: center; letter-spacing: 1px; }
+        :root { --primary: #dc3545; --bg: #000; --card-bg: #1a1a1a; --text: #fff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: var(--card-bg); padding: 40px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 400px; text-align: center; }
+        select, input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #222; color: #fff; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; margin-top: 20px; border-radius: 12px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #b02a37; transform: translateY(-2px); }
+        .admin-link { margin-top: 20px; display: block; color: #666; text-decoration: none; font-size: 0.9em; }
     </style>
 </head>
 <body>
-<div class="header">
-    <img src="logo.png" class="logo-img" onclick="location.href='index.html'">
-    <div id="auth-buttons">
-        <button onclick="prepareLogin('Nauczyciele')" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Nauczyciel</button>
-        <button onclick="document.getElementById('modal-admin').style.display='flex'" class="btn-wybor" style="margin-left:12px; padding: 10px 20px;">Admin</button>
-    </div>
+
+<div class="card" id="login-screen">
+    <h2 style="color: var(--primary)">Wybierz Klasę</h2>
+    <select id="klasa">
+        <option value="1">Klasa 1</option><option value="2">Klasa 2</option>
+        <option value="3">Klasa 3</option><option value="4">Klasa 4</option><option value="5">Klasa 5</option>
+    </select>
+    <select id="grupa">
+        <option value="TI">TI</option><option value="TE">TE</option>
+        <option value="TIG1">TIG1</option><option value="TIG2">TIG2</option>
+    </select>
+    <input type="password" id="kod" placeholder="Twój kod dostępu">
+    <button onclick="handleLogin()">Zaloguj</button>
+    <a href="#" class="admin-link" onclick="showAdmin()">Panel Administratora</a>
 </div>
 
-<div id="sekcja-glowna" class="card">
-    <div id="step-rocznik">
-        <h1 style="color: var(--primary); font-size: 2.5rem; margin-bottom: 30px;">Dobrostan</h1>
-        <p style="color: #aaa; margin-bottom: 30px;">Wybierz swój rocznik, aby kontynuować</p>
-        <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap;">
-            <button class="btn-wybor" onclick="selectYear('1')">Klasa 1</button>
-            <button class="btn-wybor" onclick="selectYear('2')">Klasa 2</button>
-            <button class="btn-wybor" onclick="selectYear('3')">Klasa 3</button>
-            <button class="btn-wybor" onclick="selectYear('4')">Klasa 4</button>
-            <button class="btn-wybor" onclick="selectYear('5')">Klasa 5</button>
-        </div>
-    </div>
-
-    <div id="step-profil" class="hidden">
-        <h2 style="margin-bottom:20px;">Wybierz swój profil</h2>
-        <div id="list-profile" class="grid-container"></div>
-        <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px;">← Wróć</button>
-    </div>
-
-    <div id="step-grupa" class="hidden">
-        <h2 style="margin-bottom:20px;">Wybierz grupę</h2>
-        <div id="list-grupy" style="display:flex; justify-content:center; gap:20px;"></div>
-        <button onclick="showStep('step-profil')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px;">← Wróć</button>
-    </div>
-
-    <div id="step-login" class="hidden">
-        <h2 id="login-title">Logowanie Kodem</h2>
-        <div id="teacher-quote" class="quote-box hidden">„Dobrostan nauczyciela to dobrostan ucznia”</div>
-        <input type="text" id="user_code" placeholder="Wprowadź swój unikalny kod..." autocomplete="off">
-        <button onclick="handleLogin()" class="btn-wybor" style="display:block; margin: 20px auto; width: 60%;">Zaloguj się</button>
-    </div>
-
-    <div id="step-vote" class="hidden">
-        <h2 id="vote-as">Głosujesz jako:</h2>
-        <div style="display:flex; justify-content:center; gap:25px; margin-top:20px; flex-wrap:wrap;">
-            <button onclick="submitVote('dobrze')" class="btn-wybor" style="background:var(--success); height:150px; width:180px;">Dobrze 😊</button>
-            <button onclick="submitVote('zle')" class="btn-wybor" style="background:var(--warning); color:black; height:150px; width:180px;">Źle 😐</button>
-            <button onclick="submitVote('fatalnie')" class="btn-wybor" style="background:var(--primary); height:150px; width:180px;">Fatalnie 😖</button>
-        </div>
-    </div>
+<div class="card" id="admin-screen" style="display:none">
+    <h2 style="color: var(--primary)">Panel Admina</h2>
+    <input type="text" id="admin_user" placeholder="Login">
+    <input type="password" id="admin_pass" placeholder="Hasło">
+    <button onclick="handleAdminLogin()">Zaloguj jako Admin</button>
+    <a href="#" class="admin-link" onclick="showLogin()">Powrót</a>
 </div>
 
-<div id="modal-admin" class="modal">
-    <div class="card" style="max-width:380px;">
-        <h2>Panel Administratora</h2>
-        <input type="text" id="admin_user" placeholder="Login">
-        <input type="password" id="admin_pass" placeholder="Hasło">
-        <button onclick="handleAdminLogin()" class="btn-wybor" style="width:100%; margin-top:15px;">Zaloguj</button>
-        <button onclick="document.getElementById('modal-admin').style.display='none'" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">Anuluj</button>
-    </div>
+<div class="card" id="vote-screen" style="display:none">
+    <h2>Jak się dziś czujesz?</h2>
+    <button onclick="vote('dobrze')" style="background: #28a745">Dobrze 😊</button>
+    <button onclick="vote('zle')" style="background: #ffc107; color: #000">Źle 😐</button>
+    <button onclick="vote('fatalnie')" style="background: #dc3545">Fatalnie ☹️</button>
 </div>
-
-<footer>© 2026 Dobrostan dla ZSTiO Jarosław.</footer>
 
 <script>
-    const CONFIG = {'1':['TE','TG','TI','TM','TP','TS' ,'BS','BK'],'2':['TE','TI','TP','TS','BK','BS'],'3':['TA','TE','TI','TM','TP','TS','BK','BS'],'4':['TE','TG','TI','TM','TP','TS','TT'],'5':['TE','TG','TI','TP','TS']};
-    let currentTable = '';
-    let currentUserIdentity = '';
-
-    function showStep(id) {
-        document.querySelectorAll('#sekcja-glowna > div').forEach(div => div.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
+    function showAdmin() {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('admin-screen').style.display = 'block';
     }
 
-    function selectYear(y) {
-        const cont = document.getElementById('list-profile'); cont.innerHTML = '';
-        CONFIG[y].forEach(p => {
-            let b = document.createElement('button'); b.className = 'btn-wybor'; b.innerText = p;
-            b.onclick = () => { if(['TG','TI','BS','BK','TT'].includes(p)) prepareLogin(y+p); else selectGroup(y+p); };
-            cont.appendChild(b);
-        });
-        showStep('step-profil');
+    function showLogin() {
+        document.getElementById('admin-screen').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'block';
     }
 
-    function selectGroup(prefix) {
-        const cont = document.getElementById('list-grupy'); cont.innerHTML = '';
-        const grp = prefix.includes('TM') ? ['_Automatyk','_Mechanik'] : ['G1','G2'];
-        grp.forEach(g => {
-            let b = document.createElement('button'); b.className = 'btn-wybor'; b.innerText = g.replace('_','');
-            b.onclick = () => prepareLogin(prefix+g); cont.appendChild(b);
-        });
-        showStep('step-grupa');
-    }
-
-    function prepareLogin(table) {
-        currentTable = table;
-        document.getElementById('login-title').innerText = (table === 'Nauczyciele') ? "Ankieta Nauczyciela" : "Klasa " + table;
-        if(table === 'Nauczyciele') document.getElementById('teacher-quote').classList.remove('hidden');
-        showStep('step-login');
-    }
-
-    async function handleLogin() {
-        const code = document.getElementById('user_code').value;
-        const res = await fetch('/api/login', {
-            method: 'POST',
-            body: JSON.stringify({ table: currentTable, code: code })
-        });
-        if(res.ok) {
-            currentUserIdentity = currentTable;
-            document.getElementById('vote-as').innerHTML = `Głosujesz jako: <span style="color:var(--primary)">${currentTable}</span>`;
-            showStep('step-vote');
-        } else {
-            alert('Błędny kod!');
-        }
-    }
-
-    async function submitVote(mood) {
-        await fetch('/api/vote', {
-            method: 'POST',
-            body: JSON.stringify({ mood: mood, who: currentUserIdentity })
-        });
-        alert('Dziękujemy za oddanie głosu!');
-        location.reload();
-    }
-<script>
-    // Funkcja logowania dla ucznia (Kody z tabel klasowych)
     async function handleLogin() {
         const klasa = document.getElementById('klasa').value;
         const grupa = document.getElementById('grupa').value;
         const kod = document.getElementById('kod').value;
-        const tabela = klasa + grupa; // np. 1TEG1
+        const tabela = klasa + grupa;
 
-        const res = await fetch('/api/login', {
-            method: 'POST',
-            body: JSON.stringify({ tabela, kod })
-        });
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                body: JSON.stringify({ tabela, kod })
+            });
 
-        if(res.ok) {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('vote-screen').style.display = 'block';
-            window.currentUser = { tabela, kod };
-        } else {
-            alert('Błędny kod dla klasy ' + tabela);
-        }
+            if(res.ok) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('vote-screen').style.display = 'block';
+                window.currentUser = { tabela, kod };
+            } else {
+                alert('Błędny kod!');
+            }
+        } catch(e) { alert('Błąd serwera'); }
     }
 
-    // TA FUNKCJA BYŁA PROBLEMEM - TERAZ JEST POPRAWIONA
     async function handleAdminLogin() {
         const user = document.getElementById('admin_user').value;
         const pass = document.getElementById('admin_pass').value;
 
-        const res = await fetch('/api/admin_login', {
-            method: 'POST',
-            body: JSON.stringify({ user, pass })
-        });
+        try {
+            const res = await fetch('/api/admin_login', {
+                method: 'POST',
+                body: JSON.stringify({ user, pass })
+            });
 
-        if(res.ok) {
-            // Przekierowanie do panelu statystyk
-            window.location.href = '/stats.html';
-        } else {
-            alert('Błędny login lub hasło administratora!');
-        }
+            if(res.ok) {
+                window.location.href = '/stats.html';
+            } else {
+                alert('Błędne dane admina');
+            }
+        } catch(e) { alert('Błąd połączenia'); }
     }
 
     async function vote(nastroj) {
@@ -196,7 +107,6 @@
             location.reload();
         }
     }
-</script>
 </script>
 </body>
 </html>
