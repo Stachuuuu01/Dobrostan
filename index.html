@@ -19,8 +19,9 @@
         .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 30px; }
         .modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); display:none; justify-content:center; align-items:center; z-index:999; backdrop-filter: blur(5px); }
         .hidden { display: none; }
-        input { width: 85%; padding: 15px; margin: 15px 0; border-radius: 10px; background: #2a2a2a; color: white; border: 1px solid #444; text-align: center; font-size: 1.1rem; outline: none; }
-        footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-align: center; }
+        input { width: 85%; padding: 15px; margin: 15px 0; border-radius: 10px; background: #2a2a2a; color: white; border: 1px solid #444; text-align: center; font-size: 1.1rem; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(220, 53, 69, 0.3); }
+        footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-align: center; letter-spacing: 1px; }
     </style>
 </head>
 <body>
@@ -30,13 +31,14 @@
     <div>
         <button id="btn-teacher" onclick="prepareLogin('Nauczyciele')" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Nauczyciel</button>
         <button id="btn-admin" onclick="document.getElementById('modal-admin').style.display='flex'" class="btn-wybor" style="margin-left:12px; padding: 10px 20px;">Admin</button>
+        <button id="btn-logout" onclick="location.reload()" class="btn-wybor hidden" style="background:#444; padding: 10px 20px;">Wyloguj</button>
     </div>
 </div>
 
 <div id="sekcja-glowna" class="card">
     <div id="step-rocznik">
         <h1 style="color: var(--primary); font-size: 2.5rem; margin-bottom: 30px;">Dobrostan</h1>
-        <p style="color: #aaa; margin-bottom: 30px;">Wybierz swój rocznik</p>
+        <p style="color: #aaa; margin-bottom: 30px;">Wybierz swój rocznik, aby kontynuować</p>
         <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap;">
             <button class="btn-wybor" onclick="selectYear('1')">Klasa 1</button>
             <button class="btn-wybor" onclick="selectYear('2')">Klasa 2</button>
@@ -47,45 +49,50 @@
     </div>
 
     <div id="step-profil" class="hidden">
-        <h2 style="margin-bottom:20px;">Wybierz profil</h2>
+        <h2 style="margin-bottom:20px;">Wybierz swój profil</h2>
         <div id="list-profile" class="grid-container"></div>
-        <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px;">← Wróć</button>
+        <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px; font-size:1.1rem;">← Wróć do wyboru klasy</button>
     </div>
 
     <div id="step-grupa" class="hidden">
         <h2 style="margin-bottom:20px;">Wybierz grupę</h2>
         <div id="list-grupy" style="display:flex; justify-content:center; gap:20px;"></div>
-        <button onclick="showStep('step-profil')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px;">← Wróć</button>
+        <button onclick="showStep('step-profil')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px;">← Wróć do profilu</button>
     </div>
 
     <div id="step-login" class="hidden">
-        <h2 id="login-title">Logowanie</h2>
+        <h2 id="login-title" style="margin-bottom:10px;">Logowanie Kodem</h2>
         <div id="teacher-quote" class="quote-box hidden">„Dobrostan nauczyciela to dobrostan ucznia”</div>
-        <input type="password" id="user_code" placeholder="Kod dostępu...">
-        <button class="btn-wybor" onclick="handleLogin()" style="display:block; margin: 20px auto; width: 60%;">Zaloguj</button>
+        <input type="password" id="user_code" placeholder="Wprowadź swój unikalny kod..." autocomplete="off">
+        <button onclick="handleLogin()" class="btn-wybor" style="display:block; margin: 20px auto; width: 60%;">Zaloguj się</button>
+        <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer;">Cofnij</button>
     </div>
 
     <div id="step-vote" class="hidden">
-        <h2>Głosujesz jako: <span id="display-identity" style="color:var(--primary)"></span></h2>
-        <div style="display:flex; justify-content:center; gap:25px; margin-top:30px;">
-            <button onclick="sendVote('dobrze')" class="btn-wybor" style="background:var(--success); height:150px; width:180px;">Dobrze 😊</button>
-            <button onclick="sendVote('zle')" class="btn-wybor" style="background:var(--warning); color:black; height:150px; width:180px;">Źle 😐</button>
-            <button onclick="sendVote('fatalnie')" class="btn-wybor" style="background:var(--primary); height:150px; width:180px;">Fatalnie 😖</button>
+        <h2 style="margin-bottom:10px;">Głosujesz jako: <span id="display-identity" style="color:var(--primary)"></span></h2>
+        <p style="color: #888; margin-bottom: 40px;">Jak się dzisiaj czujesz w szkole?</p>
+        <div style="display:flex; justify-content:center; gap:25px; margin-top:10px; flex-wrap:wrap;">
+            <button onclick="sendVote('dobrze')" class="btn-wybor" style="background:var(--success); height:150px; width:180px; font-size:1.4rem;">Dobrze 😊</button>
+            <button onclick="sendVote('zle')" class="btn-wybor" style="background:var(--warning); color:black; height:150px; width:180px; font-size:1.4rem;">Źle 😐</button>
+            <button onclick="sendVote('fatalnie')" class="btn-wybor" style="background:var(--primary); height:150px; width:180px; font-size:1.4rem;">Fatalnie 😖</button>
         </div>
     </div>
 </div>
 
 <div id="modal-admin" class="modal">
     <div class="card" style="max-width:380px;">
-        <h2>Panel Admina</h2>
+        <h2 style="margin-bottom:20px;">Panel Administratora</h2>
         <input type="text" id="admin_user" placeholder="Login">
         <input type="password" id="admin_pass" placeholder="Hasło">
-        <button class="btn-wybor" onclick="handleAdminLogin()" style="width:100%;">Zaloguj</button>
+        <button onclick="handleAdminLogin()" class="btn-wybor" style="width:100%; margin-top:15px;">Zaloguj</button>
         <button onclick="document.getElementById('modal-admin').style.display='none'" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">Anuluj</button>
     </div>
 </div>
 
-<footer>© 2026 Dobrostan dla ZSTiO Jarosław. <br> Stanisław Słabicki</footer>
+<footer>
+    © 2026 Dobrostan dla ZSTiO Jarosław. <br>
+    Zaprojektowane i stworzone przez: <strong>Stanisław Słabicki</strong>.
+</footer>
 
 <script>
     const CONFIG = {'1':['TE','TG','TI','TM','TP','TS' ,'BS','BK'],'2':['TE','TI','TP','TS','BK','BS'],'3':['TA','TE','TI','TM','TP','TS','BK','BS'],'4':['TE','TG','TI','TM','TP','TS','TT'],'5':['TE','TG','TI','TP','TS']};
@@ -119,8 +126,10 @@
 
     function prepareLogin(table) {
         currentTable = table;
-        if(table === 'Nauczyciele') { document.getElementById('teacher-quote').classList.remove('hidden'); }
-        else { document.getElementById('teacher-quote').classList.add('hidden'); }
+        const quote = document.getElementById('teacher-quote');
+        const title = document.getElementById('login-title');
+        if(table === 'Nauczyciele') { quote.classList.remove('hidden'); title.innerText = "Ankieta Nauczyciela"; }
+        else { quote.classList.add('hidden'); title.innerText = "Klasa " + table; }
         showStep('step-login');
     }
 
@@ -133,6 +142,9 @@
         if(res.ok) {
             userAuth = { tabela: currentTable, kod: kod };
             document.getElementById('display-identity').innerText = currentTable;
+            document.getElementById('btn-teacher').classList.add('hidden');
+            document.getElementById('btn-admin').classList.add('hidden');
+            document.getElementById('btn-logout').classList.remove('hidden');
             showStep('step-vote');
         } else { alert('Błędny kod!'); }
     }
@@ -142,18 +154,30 @@
             method: 'POST',
             body: JSON.stringify({ ...userAuth, nastroj: mood })
         });
-        if(res.ok) { alert('Głos oddany!'); location.reload(); }
+        if(res.ok) { alert('Dziękujemy za głos!'); location.reload(); }
     }
 
     async function handleAdminLogin() {
         const user = document.getElementById('admin_user').value;
         const pass = document.getElementById('admin_pass').value;
-        const res = await fetch('/api/admin_login', {
-            method: 'POST',
-            body: JSON.stringify({ user, pass })
-        });
-        if(res.ok) { window.location.href = '/stats.html'; }
-        else { alert('Błąd!'); }
+        try {
+            const res = await fetch('/api/admin_login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user, pass })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                window.location.href = '/stats.html';
+            } else {
+                // TUTAJ ZOBACZYSZ DOKŁADNY BŁĄD, JEŚLI WGRASZ POPRAWIONY KOD ADMIN_LOGIN.JS
+                alert('BŁĄD: ' + (data.error || "Nieznany błąd logowania"));
+            }
+        } catch (e) {
+            alert("Błąd połączenia: " + e.message);
+        }
     }
 </script>
 </body>
