@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admina - ZSTiO</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --primary: #dc3545; --bg: #000; --card-bg: #1a1a1a; --text: #fff; --success: #28a745; --warning: #ffc107; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
+        .card { background: var(--card-bg); padding: 30px; border-radius: 25px; width: 95%; max-width: 800px; text-align: center; border: 1px solid #333; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-card { background: #222; padding: 20px; border-radius: 15px; border: 1px solid #444; }
+        #chart-container { width: 300px; height: 300px; margin: 20px auto; }
+        select { padding: 10px; background: #333; color: white; border-radius: 10px; width: 100%; max-width: 300px; margin-bottom: 20px; }
+        .btn-back { padding: 10px 20px; background: #444; color: white; border: none; border-radius: 10px; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1 style="color: var(--primary)">Panel Statystyk</h1>
+    
+    <select id="class-select" onchange="updateUI()">
+        <option value="all">Cała szkoła</option>
+    </select>
+
+    <div class="stat-grid">
+        <div class="stat-card">Suma: <br><strong id="total-val">0</strong></div>
+        <div class="stat-card" style="color: var(--success)">Dobrze: <br><strong id="val-d">0%</strong></div>
+        <div class="stat-card" style="color: var(--warning)">Źle: <br><strong id="val-z">0%</strong></div>
+        <div class="stat-card" style="color: var(--primary)">Fatalnie: <br><strong id="val-f">0%</strong></div>
+    </div>
+
+    <div id="chart-container"><canvas id="mainChart"></canvas></div>
+    
+    <a href="/" class="btn-back">Powrót do strony głównej</a>
+</div>
+
+<script>
+    let globalData = null;
+    let myChart = null;
+
+    async function loadStats() {
+        const res = await fetch('/api/get_stats');
+        globalData = await res.json();
+        
+        // Wypełnij select klasami
+        const select = document.getElementById('class-select');
+        Object.keys(globalData.classWise).forEach(cls => {
+            const opt = document.createElement('option');
+            opt.value = cls;
+            opt.innerText = cls;
+            select.appendChild(opt);
+        });
+
+        initChart();
+        updateUI();
+    }
+
+    function updateUI() {
+        const val = document.getElementById('class-select').value;
+        let d, z, f, t;
+
+        if(val === 'all') {
+            ({ dobrze: d, zle: z, fatalnie: f, total: t } = globalData.stats);
+        } else {
+            const c = globalData.classWise[val];
+            d = c.dobrze; z = c.zle; f = c.fatalnie; t = d + z + f;
+        }
+
+        document.getElementById('total-val').innerText = t;
+        document.getElementById('val-d').innerText = t > 0 ? Math.round((d/t)*100)+'%' : '0%';
+        document.getElementById('val-z').innerText = t > 0 ? Math.round((z/t)*100)+'%' : '0%';
+        document.getElementById('val-f').innerText = t > 0 ? Math.round((f/t)*100)+'%' : '0%';
+
+        myChart.data.datasets[0].data = [d, z, f];
+        myChart.update();
+    }
+
+    function initChart() {
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        myChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Dobrze', 'Źle', 'Fatalnie'],
+                datasets: [{
+                    data: [0, 0, 0],
+                    backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                    borderWidth: 0
+                }]
+            },
+            options: { plugins: { legend: { labels: { color: 'white' } } } }
+        });
+    }
+
+    loadStats();
+</script>
+</body>
+</html>
