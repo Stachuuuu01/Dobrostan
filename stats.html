@@ -13,8 +13,7 @@
         .label { color: #888; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
         #chart-container { max-width: 400px; margin: 30px auto; }
         
-        /* Kontrolki */
-        .controls { margin-bottom: 30px; display: flex; justify-content: center; gap: 10px; align-items: center; }
+        .controls { margin-bottom: 30px; display: flex; justify-content: center; gap: 10px; align-items: center; flex-wrap: wrap; }
         select, button { background: #333; color: white; padding: 12px 20px; border-radius: 8px; border: 1px solid #444; cursor: pointer; font-size: 1rem; }
         select:hover, button:hover { background: #444; }
         .btn-reset { background: #dc3545; border-color: #bd2130; font-weight: bold; }
@@ -59,25 +58,31 @@
     <script>
         let myChart;
 
-        // 1. Pobieranie listy klas do dropdowna
+        // 1. Pobieranie dynamicznej listy klas z bazy (kolumna 'kto')
         async function fetchClasses() {
             try {
-                const res = await fetch('/api/get_classes'); // Zakładam, że masz taki endpoint
+                // Wywołanie endpointu z parametrem type=list
+                const res = await fetch('/api/get_stats?type=list');
                 const classes = await res.json();
                 const select = document.getElementById('filter');
                 
+                // Zachowaj tylko pierwszą opcję
+                select.innerHTML = '<option value="all">Cała szkoła</option>';
+                
                 classes.forEach(className => {
-                    const option = document.createElement('option');
-                    option.value = className;
-                    option.textContent = className;
-                    select.appendChild(option);
+                    if(className) { // Pomiń puste wartości
+                        const option = document.createElement('option');
+                        option.value = className;
+                        option.textContent = className;
+                        select.appendChild(option);
+                    }
                 });
             } catch (e) {
                 console.error("Nie udało się pobrać listy klas:", e);
             }
         }
 
-        // 2. Aktualizacja statystyk
+        // 2. Aktualizacja statystyk na karcie i wykresie
         async function updateStats() {
             const filter = document.getElementById('filter').value;
             try {
@@ -96,7 +101,9 @@
                     document.getElementById('p-zle').innerText = Math.round((z / total) * 100) + "%";
                     document.getElementById('p-fatalnie').innerText = Math.round((f / total) * 100) + "%";
                 } else {
-                    document.querySelectorAll('.val:not(#total)').forEach(el => el.innerText = "0%");
+                    document.getElementById('p-dobrze').innerText = "0%";
+                    document.getElementById('p-zle').innerText = "0%";
+                    document.getElementById('p-fatalnie').innerText = "0%";
                 }
 
                 renderChart(d, z, f);
@@ -105,12 +112,11 @@
             }
         }
 
-        // 3. Renderowanie wykresu
+        // 3. Renderowanie wykresu (Chart.js)
         function renderChart(d, z, f) {
             const ctx = document.getElementById('chart').getContext('2d');
             if (myChart) myChart.destroy();
 
-            // Jeśli nie ma danych, pokaż szary okrąg
             const hasData = (d + z + f) > 0;
             
             myChart = new Chart(ctx, {
@@ -132,12 +138,12 @@
             });
         }
 
-        // 4. Funkcja Resetu
+        // 4. Funkcja Resetu - komunikacja z reset_stats.js
         async function resetStats() {
             const filter = document.getElementById('filter').value;
-            const scope = filter === 'all' ? "wszystkie dane" : `dane dla ${filter}`;
+            const scope = filter === 'all' ? "WSZYSTKIE dane ze szkoły" : `dane dla: ${filter}`;
             
-            if (confirm(`Czy na pewno chcesz zresetować ${scope}? Tej operacji nie da się cofnąć.`)) {
+            if (confirm(`UWAGA: Czy na pewno chcesz trwale USUNĄĆ ${scope}?`)) {
                 try {
                     const res = await fetch('/api/reset_stats', {
                         method: 'POST',
@@ -146,18 +152,22 @@
                     });
                     
                     if (res.ok) {
-                        alert("Zresetowano pomyślnie!");
+                        alert("Dane zostały wyczyszczone.");
                         updateStats();
+                        fetchClasses(); // Odśwież listę, jeśli klasy zostały usunięte
+                    } else {
+                        alert("Błąd serwera podczas resetowania.");
                     }
                 } catch (e) {
-                    alert("Błąd podczas resetowania.");
+                    alert("Błąd połączenia z API.");
                 }
             }
         }
 
-        // Inicjalizacja
+        // Start
         fetchClasses();
         updateStats();
+        // Automatyczne odświeżanie co 10 sekund
         setInterval(updateStats, 10000);
     </script>
 </body>
