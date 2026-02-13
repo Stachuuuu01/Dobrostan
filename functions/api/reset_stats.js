@@ -1,21 +1,22 @@
-// api/reset_stats.js
-export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Tylko metoda POST' });
+export async function onRequestPost(context) {
+  try {
+    const db = context.env.baza;
+    const { filter } = await context.request.json();
+
+    let query = "DELETE FROM Wyniki";
+    let params = [];
+
+    if (filter && filter !== 'all') {
+      query += " WHERE kto = ?";
+      params.push(filter);
     }
 
-    const { filter } = req.body;
+    await db.prepare(query).bind(...params).run();
 
-    try {
-        // TUTAJ WSTAW SWOJĄ LOGIKĘ CZYSZCZENIA BAZY
-        // Przykład dla bazy SQL: 
-        // if(filter === 'all') await db.query('DELETE FROM votes');
-        // else await db.query('DELETE FROM votes WHERE klasa = ?', [filter]);
-
-        console.log(`Resetowanie danych dla: ${filter}`);
-        
-        return res.status(200).json({ success: true });
-    } catch (error) {
-        return res.status(500).json({ error: error.message });
-    }
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+  }
 }
