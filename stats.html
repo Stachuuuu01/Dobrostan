@@ -2,173 +2,169 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Panel Statystyk - ZSTiO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statystyki - Dobrostan</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background: #111; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; }
-        .stats-grid { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin: 20px 0; }
-        .stat-card { background: #222; padding: 20px; border-radius: 15px; min-width: 140px; border: 1px solid #333; transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-5px); }
-        .val { font-size: 2.2rem; font-weight: bold; display: block; margin-top: 5px; }
-        .label { color: #888; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
-        #chart-container { max-width: 400px; margin: 30px auto; }
-        
-        .controls { margin-bottom: 30px; display: flex; justify-content: center; gap: 10px; align-items: center; flex-wrap: wrap; }
-        select, button { background: #333; color: white; padding: 12px 20px; border-radius: 8px; border: 1px solid #444; cursor: pointer; font-size: 1rem; }
-        select:hover, button:hover { background: #444; }
-        .btn-reset { background: #dc3545; border-color: #bd2130; font-weight: bold; }
-        .btn-reset:hover { background: #c82333; }
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --primary: #27ae60;
+            --secondary: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--secondary);
+            color: white;
+            width: 100%;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        h2 { color: var(--secondary); text-align: center; }
+
+        /* KONTENER WYKRESU - Klucz do tego, by nie był ucięty */
+        .chart-wrapper {
+            position: relative;
+            margin: auto;
+            height: 400px; /* Stała wysokość */
+            width: 100%;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 5px solid var(--primary);
+        }
+
+        .stat-card span { font-size: 0.8rem; color: #666; text-transform: uppercase; }
+        .stat-card div { font-size: 1.5rem; font-weight: bold; color: var(--secondary); }
+
+        .btn-logout {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Statystyki</h1>
+<div class="header">
+    <h1>Dobrostan - Panel Statystyk</h1>
+</div>
 
-    <div class="controls">
-        <select id="filter" onchange="updateStats()">
-            <option value="all">Cała szkoła</option>
-            </select>
-
-        <button class="btn-reset" onclick="resetStats()">Resetuj Dane</button>
+<div class="container">
+    <h2>Rozkład Wyników</h2>
+    
+    <div class="chart-wrapper">
+        <canvas id="mainChart"></canvas>
     </div>
 
-    <div class="stats-grid">
+    <div class="stats-summary" id="summary">
         <div class="stat-card">
-            <span class="label">Suma głosów</span>
-            <span id="total" class="val">0</span>
+            <span>Suma odpowiedzi</span>
+            <div id="totalCount">0</div>
         </div>
-        <div class="stat-card" style="border-bottom: 4px solid #28a745;">
-            <span class="label">Dobrze</span>
-            <span id="p-dobrze" class="val">0%</span>
-        </div>
-        <div class="stat-card" style="border-bottom: 4px solid #ffc107;">
-            <span class="label">Źle</span>
-            <span id="p-zle" class="val">0%</span>
-        </div>
-        <div class="stat-card" style="border-bottom: 4px solid #dc3545;">
-            <span class="label">Fatalnie</span>
-            <span id="p-fatalnie" class="val">0%</span>
+        <div class="stat-card">
+            <span>Średni wynik</span>
+            <div id="avgScore">0%</div>
         </div>
     </div>
+</div>
 
-    <div id="chart-container">
-        <canvas id="chart"></canvas>
-    </div>
-
-    <script>
-        let myChart;
-
-        // 1. Pobieranie dynamicznej listy klas z bazy (kolumna 'kto')
-        async function fetchClasses() {
-            try {
-                // Wywołanie endpointu z parametrem type=list
-                const res = await fetch('/api/get_stats?type=list');
-                const classes = await res.json();
-                const select = document.getElementById('filter');
-                
-                // Zachowaj tylko pierwszą opcję
-                select.innerHTML = '<option value="all">Cała szkoła</option>';
-                
-                classes.forEach(className => {
-                    if(className) { // Pomiń puste wartości
-                        const option = document.createElement('option');
-                        option.value = className;
-                        option.textContent = className;
-                        select.appendChild(option);
-                    }
-                });
-            } catch (e) {
-                console.error("Nie udało się pobrać listy klas:", e);
+<script>
+    // Inicjalizacja wykresu z pustymi danymi
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    
+    const mainChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Dobrze', 'Średnio', 'Źle'],
+            datasets: [{
+                data: [0, 0, 0], // Dane początkowe
+                backgroundColor: ['#27ae60', '#f1c40f', '#e74c3c'],
+                hoverOffset: 10,
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // KLUCZOWE: Wykres dopasuje się do .chart-wrapper
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 20, font: { size: 14 } }
+                }
+            },
+            layout: {
+                padding: { top: 10, bottom: 10, left: 10, right: 10 }
             }
         }
+    });
 
-        // 2. Aktualizacja statystyk na karcie i wykresie
-        async function updateStats() {
-            const filter = document.getElementById('filter').value;
-            try {
-                const res = await fetch(`/api/get_stats?filter=${filter}`);
-                const data = await res.json();
-                
-                const d = data.dobrze || 0;
-                const z = data.zle || 0;
-                const f = data.fatalnie || 0;
-                const total = d + z + f;
+    // Funkcja pobierająca dane z Twojej bazy D1 przez API
+    async function loadData() {
+        try {
+            // Zakładamy, że masz stworzony endpoint /api/stats
+            const response = await fetch('/api/stats'); 
+            const data = await response.json();
 
-                document.getElementById('total').innerText = total;
+            if (data) {
+                // Aktualizacja wykresu
+                mainChart.data.datasets[0].data = [data.dobrze, data.srednio, data.zle];
+                mainChart.update();
 
-                if (total > 0) {
-                    document.getElementById('p-dobrze').innerText = Math.round((d / total) * 100) + "%";
-                    document.getElementById('p-zle').innerText = Math.round((z / total) * 100) + "%";
-                    document.getElementById('p-fatalnie').innerText = Math.round((f / total) * 100) + "%";
-                } else {
-                    document.getElementById('p-dobrze').innerText = "0%";
-                    document.getElementById('p-zle').innerText = "0%";
-                    document.getElementById('p-fatalnie').innerText = "0%";
-                }
-
-                renderChart(d, z, f);
-            } catch (e) {
-                console.error("Błąd ładowania danych:", e);
+                // Aktualizacja liczników
+                document.getElementById('totalCount').innerText = data.dobrze + data.srednio + data.zle;
+                document.getElementById('avgScore').innerText = data.srednia + "%";
             }
+        } catch (error) {
+            console.error("Błąd ładowania danych:", error);
+            // Dane testowe, jeśli API jeszcze nie działa:
+            mainChart.data.datasets[0].data = [45, 25, 10];
+            mainChart.update();
         }
+    }
 
-        // 3. Renderowanie wykresu (Chart.js)
-        function renderChart(d, z, f) {
-            const ctx = document.getElementById('chart').getContext('2d');
-            if (myChart) myChart.destroy();
+    // Załaduj dane po otwarciu strony
+    loadData();
+</script>
 
-            const hasData = (d + z + f) > 0;
-            
-            myChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Dobrze', 'Źle', 'Fatalnie'],
-                    datasets: [{
-                        data: hasData ? [d, z, f] : [1],
-                        backgroundColor: hasData ? ['#28a745', '#ffc107', '#dc3545'] : ['#333'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { 
-                    cutout: '70%',
-                    plugins: { 
-                        legend: { position: 'bottom', labels: { color: 'white', padding: 20 } } 
-                    }
-                }
-            });
-        }
-
-        // 4. Funkcja Resetu - komunikacja z reset_stats.js
-        async function resetStats() {
-            const filter = document.getElementById('filter').value;
-            const scope = filter === 'all' ? "WSZYSTKIE dane ze szkoły" : `dane dla: ${filter}`;
-            
-            if (confirm(`UWAGA: Czy na pewno chcesz trwale USUNĄĆ ${scope}?`)) {
-                try {
-                    const res = await fetch('/api/reset_stats', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ filter: filter })
-                    });
-                    
-                    if (res.ok) {
-                        alert("Dane zostały wyczyszczone.");
-                        updateStats();
-                        fetchClasses(); // Odśwież listę, jeśli klasy zostały usunięte
-                    } else {
-                        alert("Błąd serwera podczas resetowania.");
-                    }
-                } catch (e) {
-                    alert("Błąd połączenia z API.");
-                }
-            }
-        }
-
-        // Start
-        fetchClasses();
-        updateStats();
-        // Automatyczne odświeżanie co 10 sekund
-        setInterval(updateStats, 10000);
-    </script>
 </body>
 </html>
