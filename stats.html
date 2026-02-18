@@ -3,167 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statystyki - Dobrostan</title>
+    <title>Dobrostan - Statystyki Admina</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #f4f7f6;
-            --card-bg: #ffffff;
-            --primary: #27ae60;
-            --secondary: #2c3e50;
+            --bg: #121212;
+            --card-bg: #1e1e1e;
+            --accent: #e74c3c;
+            --text: #ffffff;
+            --text-muted: #b3b3b3;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
         }
 
         .header {
-            background: var(--secondary);
-            color: white;
             width: 100%;
-            padding: 1rem 0;
+            padding: 2rem 0;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-bottom: 2px solid var(--accent);
+            background: #000;
+        }
+
+        .header h1 {
+            color: var(--accent);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 3px;
         }
 
         .container {
             width: 90%;
-            max-width: 800px;
-            margin: 20px auto;
+            max-width: 900px;
+            margin: 40px auto;
             background: var(--card-bg);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #333;
         }
 
-        h2 { color: var(--secondary); text-align: center; }
+        h2 { color: var(--text); font-weight: 300; text-align: center; }
 
-        /* KONTENER WYKRESU - Klucz do tego, by nie był ucięty */
+        /* Poprawiony kontener wykresu */
         .chart-wrapper {
             position: relative;
-            margin: auto;
-            height: 400px; /* Stała wysokość */
+            height: 450px; /* Zwiększona wysokość */
             width: 100%;
+            margin-top: 20px;
         }
 
-        .stats-summary {
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
-            margin-top: 30px;
+            margin-top: 40px;
         }
 
         .stat-card {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
+            background: #252525;
+            padding: 20px;
+            border-radius: 4px;
             text-align: center;
-            border-left: 5px solid var(--primary);
+            border-bottom: 3px solid var(--accent);
+            transition: transform 0.2s;
         }
 
-        .stat-card span { font-size: 0.8rem; color: #666; text-transform: uppercase; }
-        .stat-card div { font-size: 1.5rem; font-weight: bold; color: var(--secondary); }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-card span { font-size: 12px; color: var(--text-muted); text-transform: uppercase; }
+        .stat-card div { font-size: 28px; font-weight: bold; margin-top: 10px; color: var(--accent); }
 
-        .btn-logout {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 5px;
+        .logout-btn {
+            margin: 40px 0;
+            padding: 12px 30px;
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            border-radius: 4px;
             cursor: pointer;
-            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: var(--accent);
+            color: white;
         }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>Dobrostan - Panel Statystyk</h1>
+    <h1>Panel Administratora</h1>
 </div>
 
 <div class="container">
-    <h2>Rozkład Wyników</h2>
+    <h2>Rozkład nastrojów</h2>
     
     <div class="chart-wrapper">
-        <canvas id="mainChart"></canvas>
+        <canvas id="statsChart"></canvas>
     </div>
 
-    <div class="stats-summary" id="summary">
+    <div class="stats-grid">
         <div class="stat-card">
-            <span>Suma odpowiedzi</span>
-            <div id="totalCount">0</div>
+            <span>Suma głosów</span>
+            <div id="count">0</div>
         </div>
         <div class="stat-card">
-            <span>Średni wynik</span>
-            <div id="avgScore">0%</div>
+            <span>Ostatnia aktualizacja</span>
+            <div id="lastUpdate" style="font-size: 18px;">--:--</div>
         </div>
     </div>
 </div>
 
+<button class="logout-btn" onclick="logout()">Wyloguj</button>
+
 <script>
-    // Inicjalizacja wykresu z pustymi danymi
-    const ctx = document.getElementById('mainChart').getContext('2d');
+    // Konfiguracja wykresu w stylu Dark + Red
+    const ctx = document.getElementById('statsChart').getContext('2d');
     
-    const mainChart = new Chart(ctx, {
+    const statsChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Dobrze', 'Średnio', 'Źle'],
+            labels: ['Negatywne', 'Neutralne', 'Pozytywne'],
             datasets: [{
-                data: [0, 0, 0], // Dane początkowe
-                backgroundColor: ['#27ae60', '#f1c40f', '#e74c3c'],
-                hoverOffset: 10,
-                borderWidth: 2,
-                borderColor: '#ffffff'
+                data: [1, 1, 1], // Placeholder
+                backgroundColor: [
+                    '#c0392b', // Ciemna czerwień
+                    '#7f8c8d', // Szary
+                    '#e74c3c'  // Jasna czerwień
+                ],
+                borderColor: '#1e1e1e',
+                borderWidth: 4,
+                hoverOffset: 15
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false, // KLUCZOWE: Wykres dopasuje się do .chart-wrapper
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     position: 'bottom',
-                    labels: { padding: 20, font: { size: 14 } }
+                    labels: {
+                        color: '#b3b3b3',
+                        font: { size: 14, family: 'Inter' },
+                        padding: 30
+                    }
                 }
             },
             layout: {
-                padding: { top: 10, bottom: 10, left: 10, right: 10 }
+                padding: 10
             }
         }
     });
 
-    // Funkcja pobierająca dane z Twojej bazy D1 przez API
-    async function loadData() {
+    // Funkcja pobierania danych (zintegrowana z Twoim API)
+    async function fetchData() {
         try {
-            // Zakładamy, że masz stworzony endpoint /api/stats
-            const response = await fetch('/api/stats'); 
-            const data = await response.json();
-
-            if (data) {
-                // Aktualizacja wykresu
-                mainChart.data.datasets[0].data = [data.dobrze, data.srednio, data.zle];
-                mainChart.update();
-
-                // Aktualizacja liczników
-                document.getElementById('totalCount').innerText = data.dobrze + data.srednio + data.zle;
-                document.getElementById('avgScore').innerText = data.srednia + "%";
-            }
-        } catch (error) {
-            console.error("Błąd ładowania danych:", error);
-            // Dane testowe, jeśli API jeszcze nie działa:
-            mainChart.data.datasets[0].data = [45, 25, 10];
-            mainChart.update();
+            // Tu wpisz swój endpoint API, który przygotujemy
+            const res = await fetch('/api/stats');
+            const data = await res.json();
+            
+            statsChart.data.datasets[0].data = [data.zle, data.srednio, data.dobrze];
+            statsChart.update();
+            
+            document.getElementById('count').innerText = data.total;
+            document.getElementById('lastUpdate').innerText = new Date().toLocaleTimeString();
+        } catch (e) {
+            console.log("Czekam na dane z API...");
+            // Dane testowe, żebyś widział efekt
+            statsChart.data.datasets[0].data = [30, 20, 50];
+            statsChart.update();
         }
     }
 
-    // Załaduj dane po otwarciu strony
-    loadData();
+    function logout() {
+        document.cookie = "auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.href = "/";
+    }
+
+    fetchData();
+    setInterval(fetchData, 30000); // Odświeżaj co 30s
 </script>
 
 </body>
