@@ -158,8 +158,12 @@
         });
         if(res.ok) { 
             if (mood === 'fatalnie') {
+                let helpUrl = (currentTable === 'Nauczyciele') 
+                    ? 'https://twarzedepresji.pl/telefon-zaufania-dla-nauczycieli/' 
+                    : 'https://twarzedepresji.pl/pomoc-dla-dzieci-i-mlodziezy/';
+                
                 if (confirm('Dziękujemy za głos. Pamiętaj, że nie jesteś sam/a. Czy chcesz zobaczyć, gdzie szukać pomocy i wsparcia?')) {
-                    window.open('https://twarzedepresji.pl/pomoc-dla-dzieci-i-mlodziezy/', '_blank');
+                    window.open(helpUrl, '_blank');
                 }
             } else {
                 alert('Dziękujemy za głos!'); 
