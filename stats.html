@@ -8,12 +8,10 @@
         :root { --primary: #dc3545; --success: #28a745; --warning: #ffc107; --dark-bg: #111; --card-bg: #222; }
         body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; margin: 0; }
         
-        /* GÓRNY PASEK */
         .top-bar { display: flex; justify-content: flex-end; padding: 10px 20px; }
         .btn-logout { background: #444; color: white; border: 1px solid #555; padding: 8px 15px; border-radius: 6px; cursor: pointer; transition: 0.3s; font-size: 0.9rem; }
         .btn-logout:hover { background: var(--primary); border-color: var(--primary); }
 
-        /* SIATKA KART */
         .stats-grid { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin: 20px 0; }
         .stat-card { background: var(--card-bg); padding: 20px; border-radius: 15px; min-width: 140px; border: 1px solid #333; cursor: pointer; transition: 0.2s; }
         .stat-card:hover { transform: translateY(-5px); background: #2a2a2a; }
@@ -22,19 +20,16 @@
         
         #chart-container { position: relative; max-width: 500px; height: 400px; margin: 30px auto; }
         
-        /* ELEMENTY STERUJĄCE */
         .controls { margin-bottom: 30px; display: flex; justify-content: center; gap: 10px; align-items: center; flex-wrap: wrap; }
         select, button { background: #333; color: white; padding: 12px 20px; border-radius: 8px; border: 1px solid #444; cursor: pointer; font-size: 1rem; }
         .btn-reset { background: var(--primary); font-weight: bold; }
 
-        /* MODAL (POPUP) */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); justify-content: center; align-items: center; }
         .modal-content { background: var(--card-bg); padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; border: 1px solid #444; max-height: 80vh; overflow-y: auto; }
         .modal-header { border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px; font-size: 1.5rem; font-weight: bold; }
         .history-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #333; font-size: 0.95rem; text-align: left; }
         .history-item span { color: #aaa; font-size: 0.85rem; }
         .close-btn { background: #444; margin-top: 20px; width: 100%; border: none; color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .close-btn:hover { background: #555; }
     </style>
 </head>
 <body>
@@ -88,7 +83,7 @@
         let fullHistory = [];
 
         function logout() {
-            if(confirm("Czy na pewno chcesz się wylogować?")) window.location.href = '/'; 
+            if(confirm("Wylogować?")) window.location.href = '/'; 
         }
 
         async function fetchClasses() {
@@ -98,12 +93,10 @@
                 const select = document.getElementById('filter');
                 select.innerHTML = '<option value="all">Cała szkoła</option>';
                 classes.forEach(c => {
-                    if(c) {
-                        const opt = document.createElement('option');
-                        opt.value = c; opt.textContent = c; select.appendChild(opt);
-                    }
+                    const opt = document.createElement('option');
+                    opt.value = c; opt.textContent = c; select.appendChild(opt);
                 });
-            } catch (e) { console.error("Błąd pobierania klas:", e); }
+            } catch (e) { console.error(e); }
         }
 
         async function updateStats() {
@@ -112,11 +105,13 @@
                 const res = await fetch(`/api/get_stats?filter=${filter}`);
                 const data = await res.json();
                 
-                // Zapisujemy całą listę głosów do zmiennej lokalnej
+                // Przypisanie danych z obiektu stats wysyłanego przez poprawiony get_stats.js
                 fullHistory = data.historia || []; 
-
-                const d = data.dobrze || 0, z = data.zle || 0, f = data.fatalnie || 0;
+                const d = data.dobrze || 0;
+                const z = data.zle || 0;
+                const f = data.fatalnie || 0;
                 const total = d + z + f;
+
                 document.getElementById('total').innerText = total;
 
                 if (total > 0) {
@@ -126,14 +121,17 @@
                 } else {
                     document.querySelectorAll('.val:not(#total)').forEach(el => el.innerText = "0%");
                 }
+                
                 renderChart(d, z, f);
-            } catch (e) { console.error("Błąd aktualizacji:", e); }
+            } catch (e) { console.error("Błąd aktualizacji frontendu:", e); }
         }
 
         function renderChart(d, z, f) {
             const ctx = document.getElementById('chart').getContext('2d');
             if (myChart) myChart.destroy();
+            
             const hasData = (d + z + f) > 0;
+            
             myChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -141,13 +139,18 @@
                     datasets: [{
                         data: hasData ? [d, z, f] : [1],
                         backgroundColor: hasData ? ['#28a745', '#ffc107', '#dc3545'] : ['#333'],
-                        borderWidth: 0, hoverOffset: 20
+                        borderWidth: 0
                     }]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '70%',
-                    onClick: (e, el) => { if(el.length > 0) showDetails(['dobrze','zle','fatalnie'][el[0].index]); },
-                    plugins: { legend: { position: 'bottom', labels: { color: 'white' } } }
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: 'white' } }
+                    },
+                    onClick: (e, el) => {
+                        if(el.length > 0) showDetails(['dobrze','zle','fatalnie'][el[0].index]);
+                    }
                 }
             });
         }
@@ -158,17 +161,16 @@
             list.innerHTML = '';
             document.getElementById('modalTitle').innerText = "Głosy: " + mood.toUpperCase();
 
-            // Filtrowanie po Twojej kolumnie 'nastroj'
             const filtered = mood === 'all' ? fullHistory : fullHistory.filter(h => h.nastroj === mood);
 
             if (filtered.length === 0) {
-                list.innerHTML = `<p style="color:#888; padding: 20px;">Brak wpisów dla tego nastroju.</p>`;
+                list.innerHTML = `<p style="color:#888; padding: 20px;">Brak wpisów.</p>`;
             } else {
-                // Mapowanie nazw kolumn z Twojego MySQL: kto, data_dodania
                 filtered.slice().reverse().forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'history-item';
-                    div.innerHTML = `<strong>${item.kto || 'Nieznany'}</strong> <span>${item.data_dodania || ''}</span>`;
+                    const dataFormated = item.data_dodania ? new Date(item.data_dodania).toLocaleString('pl-PL') : 'Brak daty';
+                    div.innerHTML = `<strong>${item.kto || 'Nieznany'}</strong> <span>${dataFormated}</span>`;
                     list.appendChild(div);
                 });
             }
@@ -179,7 +181,7 @@
 
         async function resetStats() {
             const f = document.getElementById('filter').value;
-            if (confirm("Czy na pewno chcesz wyczyścić bazę danych?")) {
+            if (confirm("Wyczyścić dane?")) {
                 await fetch('/api/reset_stats', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -191,7 +193,7 @@
 
         fetchClasses();
         updateStats();
-        setInterval(updateStats, 10000); // Automatyczne odświeżanie
+        setInterval(updateStats, 10000);
     </script>
 </body>
 </html>
