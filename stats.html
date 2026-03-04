@@ -28,8 +28,9 @@
         .modal-content { background: var(--card-bg); padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; border: 1px solid #444; max-height: 80vh; overflow-y: auto; }
         .modal-header { border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px; font-size: 1.5rem; font-weight: bold; }
         .history-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #333; font-size: 0.95rem; text-align: left; }
-        .history-item span { color: #aaa; font-style: italic; }
-        .close-btn { background: #444; margin-top: 20px; width: 100%; border: none; color: white; padding: 10px; border-radius: 8px; cursor: pointer; }
+        .history-item span { color: #aaa; font-size: 0.85rem; }
+        .close-btn { background: #444; margin-top: 20px; width: 100%; border: none; color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .close-btn:hover { background: #555; }
     </style>
 </head>
 <body>
@@ -83,7 +84,7 @@
         let fullHistory = [];
 
         function logout() {
-            if(confirm("Wylogować?")) window.location.href = '/'; 
+            if(confirm("Czy na pewno chcesz się wylogować?")) window.location.href = '/'; 
         }
 
         async function fetchClasses() {
@@ -93,10 +94,12 @@
                 const select = document.getElementById('filter');
                 select.innerHTML = '<option value="all">Cała szkoła</option>';
                 classes.forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c; opt.textContent = c; select.appendChild(opt);
+                    if(c) {
+                        const opt = document.createElement('option');
+                        opt.value = c; opt.textContent = c; select.appendChild(opt);
+                    }
                 });
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Błąd pobierania klas:", e); }
         }
 
         async function updateStats() {
@@ -105,7 +108,7 @@
                 const res = await fetch(`/api/get_stats?filter=${filter}`);
                 const data = await res.json();
                 
-                // Przypisanie historii (prawdziwej lub pustej tablicy)
+                // Przypisujemy historię z serwera
                 fullHistory = data.historia || []; 
 
                 const d = data.dobrze || 0, z = data.zle || 0, f = data.fatalnie || 0;
@@ -120,7 +123,7 @@
                     document.querySelectorAll('.val:not(#total)').forEach(el => el.innerText = "0%");
                 }
                 renderChart(d, z, f);
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Błąd aktualizacji:", e); }
         }
 
         function renderChart(d, z, f) {
@@ -151,16 +154,17 @@
             list.innerHTML = '';
             document.getElementById('modalTitle').innerText = "Głosy: " + mood.toUpperCase();
 
-            // Filtrowanie
+            // Filtrowanie po polu 'nastroj' (zgodnie z Twoją bazą)
             const filtered = mood === 'all' ? fullHistory : fullHistory.filter(h => h.nastroj === mood);
 
             if (filtered.length === 0) {
-                list.innerHTML = `<p style="color:#888;">Brak szczegółowych wpisów w bazie dla: ${mood}.</p>`;
+                list.innerHTML = `<p style="color:#888; padding: 20px;">Brak wpisów dla: ${mood}.</p>`;
             } else {
+                // Mapujemy Twoje kolumny: 'kto' jako klasa, 'data_dodania' jako czas
                 filtered.slice().reverse().forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'history-item';
-                    div.innerHTML = `<strong>Klasa: ${item.tabela}</strong> <span>${item.czas || 'Brak godziny'}</span>`;
+                    div.innerHTML = `<strong>${item.kto || 'Anonim'}</strong> <span>${item.data_dodania || ''}</span>`;
                     list.appendChild(div);
                 });
             }
@@ -171,7 +175,7 @@
 
         async function resetStats() {
             const f = document.getElementById('filter').value;
-            if (confirm("Wyczyścić dane?")) {
+            if (confirm("Czy na pewno chcesz zresetować te dane?")) {
                 await fetch('/api/reset_stats', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -183,7 +187,7 @@
 
         fetchClasses();
         updateStats();
-        setInterval(updateStats, 5000);
+        setInterval(updateStats, 10000); // Odświeżanie co 10 sekund
     </script>
 </body>
 </html>
