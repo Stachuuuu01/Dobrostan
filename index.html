@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-@@ -91,9 +90,10 @@ <h2 style="margin-bottom:20px;">Panel Administratora</h2>
+@@ -91,9 +90,10 @@
 </div>
 
 <footer>
@@ -14,7 +14,7 @@ Zaprojektowane i stworzone przez: <strong>Stanisław Słabicki</strong>
 <script>
 const CONFIG = {'1':['TE','TG','TI','TM','TP','TS' ,'BS','BK'],'2':['TE','TI','TP','TS','BK','BS'],'3':['TA','TE','TI','TM','TP','TS','BK','BS'],'4':['TE','TG','TI','TM','TP','TS','TT'],'5':['TE','TG','TI','TP','TS']};
 let currentTable = "";
-@@ -137,7 +137,7 @@ <h2 style="margin-bottom:20px;">Panel Administratora</h2>
+@@ -137,7 +137,7 @@
 const kod = document.getElementById('user_code').value;
 const res = await fetch('/api/login', {
 method: 'POST',
@@ -23,7 +23,7 @@ method: 'POST',
 body: JSON.stringify({ tabela: currentTable, kod: kod })
 });
 if(res.ok) {
-@@ -153,11 +153,17 @@ <h2 style="margin-bottom:20px;">Panel Administratora</h2>
+@@ -153,11 +153,17 @@
 async function sendVote(mood) {
 const res = await fetch('/api/vote', {
 method: 'POST',
@@ -44,7 +44,7 @@ if(res.ok) {
 location.reload(); 
 } else {
 alert('Błąd zapisu głosu. Sprawdź tabelę Wyniki.');
-@@ -173,9 +179,7 @@ <h2 style="margin-bottom:20px;">Panel Administratora</h2>
+@@ -173,18 +179,16 @@
 headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify({ user, pass })
 });
@@ -54,3 +54,12 @@ const data = await res.json();
 if (res.ok) {
 window.location.href = '/stats.html';
 } else {
+alert('BŁĄD: ' + (data.error || "Nieznany błąd logowania"));
+}
+} catch (e) {
+alert("Błąd połączenia: " + e.message);
+}
+}
+</script>
+</body>
+</html>
