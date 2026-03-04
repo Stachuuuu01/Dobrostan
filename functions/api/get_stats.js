@@ -40,4 +40,34 @@ export async function onRequestGet(context) {
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
+  // Fragment get_stats.js
+// ... (logika połączenia z bazą MySQL)
+
+router.get('/get_stats', async (req, res) => {
+    const filter = req.query.filter;
+    let query = "SELECT * FROM Wyniki";
+    let params = [];
+
+    if (filter && filter !== 'all') {
+        query += " WHERE kto = ?";
+        params.push(filter);
+    }
+
+    db.query(query, params, (err, results) => {
+        if (err) return res.status(500).json({ error: err });
+
+        // Obliczamy sumy dla kart statystyk
+        const dobrze = results.filter(r => r.nastroj === 'dobrze').length;
+        const zle = results.filter(r => r.nastroj === 'zle').length;
+        const fatalnie = results.filter(r => r.nastroj === 'fatalnie').length;
+
+        // WYSYŁAMY WSZYSTKO: sumy ORAZ pełną listę (results)
+        res.json({
+            dobrze: dobrze,
+            zle: zle,
+            fatalnie: fatalnie,
+            historia: results // To jest kluczowe dla popupu!
+        });
+    });
+});
 }
