@@ -1,37 +1,30 @@
-const express = require('express');
-const router = express.Router();
-const db = require('../db'); // Upewnij się, że ścieżka do db.js jest poprawna
+const db = context.env.baza;
+const { searchParams } = new URL(context.request.url);
+const filter = searchParams.get('filter') || 'all';
+    const type = searchParams.get('type');
 
-router.get('/', (req, res) => {
-    const { type, filter } = req.query;
-
+    // NOWOŚĆ: Pobieranie listy wszystkich klas/osób do dropdowna
     if (type === 'list') {
-        db.query("SELECT DISTINCT kto FROM Wyniki", (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json(results.map(r => r.kto));
-        });
-    } else {
-        // Pobieramy nastroj, kto i date, aby popup miał co wyświetlić
-        let query = "SELECT nastroj, kto, data_dodania FROM Wyniki";
-        let params = [];
-
-        if (filter && filter !== 'all') {
-            query += " WHERE kto = ?";
-            params.push(filter);
-        }
-
-        db.query(query, params, (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
-
-            // Formujemy obiekt JSON, który zrozumie frontend
-            res.json({
-                dobrze: results.filter(r => r.nastroj === 'dobrze').length,
-                zle: results.filter(r => r.nastroj === 'zle').length,
-                fatalnie: results.filter(r => r.nastroj === 'fatalnie').length,
-                historia: results // To wypełni popup
-            });
-        });
+      const { results } = await db.prepare("SELECT DISTINCT kto FROM Wyniki WHERE kto IS NOT NULL").all();
+      const list = results.map(row => row.kto);
+      return new Response(JSON.stringify(list), {
+        headers: { "Content-Type": "application/json" }
+      });
     }
-});
 
-module.exports = router;
+    // Logika statystyk (bez zmian, tylko dopasowana do Twojej bazy)
+let query = "SELECT nastroj, COUNT(*) as count FROM Wyniki";
+let params = [];
+
+    // Używamy kolumny 'kto' zamiast 'klasa'
+if (filter !== 'all') {
+query += " WHERE kto = ?";
+params.push(filter);
+@@ -17,7 +27,6 @@ export async function onRequestGet(context) {
+
+const results = await db.prepare(query).bind(...params).all();
+
+    // Tworzymy obiekt z wynikami, upewniając się, że nazwy nastrojów pasują (dobrze, zle, fatalnie)
+const stats = { dobrze: 0, zle: 0, fatalnie: 0 };
+results.results.forEach(row => {
+if (stats.hasOwnProperty(row.nastroj)) {
