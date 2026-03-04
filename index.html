@@ -1,171 +1,187 @@
-<?php
-session_start();
-$host = 'host.docker.internal';
-$db   = 'Kody_dostępu';
-$user = 'root';
-$pass = 'root';
-try {
-    $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-        if ($_POST['action'] === 'login_admin') {
-            $stmt = $conn->prepare("SELECT * FROM Administratorzy WHERE login = :l AND haslo = :p");
-            $stmt->execute(['l' => $_POST['admin_user'], 'p' => $_POST['admin_pass']]);
-            if ($stmt->fetch()) { $_SESSION['role'] = 'admin'; header("Location: index.php"); exit; }
-        }
-        if ($_POST['action'] === 'login_by_code') {
-            $tableName = $_POST['target_table'];
-            $code = $_POST['user_code'];
-            $allowed = preg_replace('/[^a-zA-Z0-9_]/', '', $tableName);
-            $stmt = $conn->prepare("SELECT * FROM `$allowed` WHERE `kod` = :code");
-            $stmt->execute(['code' => $code]);
-            if ($stmt->fetch()) {
-                $_SESSION['verified'] = true;
-                $_SESSION['identity'] = $allowed;
-                header("Location: index.php"); exit;
-            }
-        }
-        if ($_POST['action'] === 'submit_vote' && isset($_SESSION['verified'])) {
-            $stmt = $conn->prepare("INSERT INTO Wyniki (nastroj, kto, powod) VALUES (:mood, :who, :reason)");
-            $stmt->execute([
-                'mood' => $_POST['mood'], 
-                'who' => $_SESSION['identity'],
-                'reason' => $_POST['reason'] ?? null
-            ]);
-            session_destroy();
-            echo "<script>alert('Dziękujemy za oddanie głosu!'); window.location.href='index.php';</script>";
-            exit;
-        }
-    }
-    $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
-    // ... reszta logiki statystyk (bez zmian) ...
-} catch (PDOException $e) { }
-if (isset($_GET['logout'])) { session_destroy(); header("Location: index.php"); exit; }
-?>
 <!DOCTYPE html>
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>Dobrostan - ZSTiO Jarosław</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --primary: #dc3545; --bg: #000; --card-bg: #1a1a1a; --text: #fff; --teacher: #6f42c1; --success: #28a745; --warning: #ffc107; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; margin: 0; min-height: 100vh; overflow-x: hidden; }
+        
         .header { background: #111; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); box-sizing: border-box; }
-        .card { background: var(--card-bg); padding: 40px; border-radius: 25px; width: 95%; max-width: 900px; text-align: center; margin-top: 30px; border: 1px solid #333; }
-        .btn-wybor { padding: 18px 28px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; margin: 5px; }
+        .logo-img { height: 60px; cursor: pointer; transition: transform 0.3s; }
+        
+        .card { background: var(--card-bg); padding: 40px; border-radius: 25px; width: 95%; max-width: 900px; text-align: center; margin-top: 30px; border: 1px solid #333; box-shadow: 0 15px 40px rgba(0,0,0,0.7); }
+        
+        .btn-wybor { padding: 18px 28px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem; transition: all 0.3s; margin: 5px; }
         .btn-wybor:hover { transform: translateY(-5px); filter: brightness(1.2); }
+        
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 30px; }
+        
+        .reason-list { display: flex; flex-direction: column; gap: 10px; max-width: 500px; margin: 25px auto; }
+        .btn-reason { background: #262626; text-align: left; padding: 15px; border-radius: 10px; color: white; border: 1px solid #444; cursor: pointer; transition: 0.2s; font-size: 1.1rem; }
+        .btn-reason:hover { background: var(--primary); border-color: var(--primary); transform: translateX(5px); }
+        
         .hidden { display: none; }
-        .reason-list { display: flex; flex-direction: column; gap: 10px; max-width: 500px; margin: 20px auto; }
-        .btn-reason { background: #333; text-align: left; padding: 15px; border-radius: 10px; color: white; border: 1px solid #444; cursor: pointer; transition: 0.2s; font-size: 1.1rem; }
-        .btn-reason:hover { background: var(--primary); border-color: var(--primary); }
-        footer { margin-top: auto; padding: 25px; color: #666; text-align: center; }
+        input { width: 85%; padding: 15px; margin: 15px 0; border-radius: 10px; background: #2a2a2a; color: white; border: 1px solid #444; text-align: center; }
+        footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <img src="logo.png" style="height:60px; cursor:pointer" onclick="location.href='index.php'">
+    <img src="logo.png" class="logo-img" onclick="location.reload()">
     <div>
-        <?php if (isset($_SESSION['verified']) || $isAdmin): ?>
-            <button onclick="location.href='?logout=1'" class="btn-wybor" style="background:#444;">Wyloguj</button>
-        <?php else: ?>
-            <button onclick="prepareLogin('Nauczyciele')" class="btn-wybor" style="background:var(--teacher);">Nauczyciel</button>
-            <button onclick="document.getElementById('modal-admin').style.display='flex'" class="btn-wybor">Admin</button>
-        <?php endif; ?>
+        <button id="btn-teacher" onclick="prepareLogin('Nauczyciele')" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Ankieta dla nauczyciela</button>
+        <button id="btn-logout" onclick="location.reload()" class="btn-wybor hidden" style="background:#444; padding: 10px 20px;">Wyloguj</button>
     </div>
 </div>
 
-<div id="sekcja-glowna" class="card <?php echo $isAdmin ? 'hidden' : ''; ?>">
-    <?php if (!isset($_SESSION['verified'])): ?>
-        <div id="step-rocznik">
-            <h1 style="color: var(--primary);">Dobrostan</h1>
-            <p>Wybierz swój rocznik:</p>
-            <?php for($i=1; $i<=5; $i++): ?><button class="btn-wybor" onclick="selectYear('<?php echo $i; ?>')">Klasa <?php echo $i; ?></button><?php endfor; ?>
+<div id="sekcja-glowna" class="card">
+    <div id="step-rocznik">
+        <h1 style="color: var(--primary); font-size: 2.5rem; margin-bottom: 30px;">Dobrostan</h1>
+        <p style="color: #aaa; margin-bottom: 30px;">Wybierz swój rocznik, aby kontynuować</p>
+        <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap;">
+            <button class="btn-wybor" onclick="selectYear('1')">Klasa 1</button>
+            <button class="btn-wybor" onclick="selectYear('2')">Klasa 2</button>
+            <button class="btn-wybor" onclick="selectYear('3')">Klasa 3</button>
+            <button class="btn-wybor" onclick="selectYear('4')">Klasa 4</button>
+            <button class="btn-wybor" onclick="selectYear('5')">Klasa 5</button>
         </div>
-        <div id="step-profil" class="hidden"><div id="list-profile" class="grid-container"></div></div>
-        <div id="step-grupa" class="hidden"><div id="list-grupy" class="grid-container"></div></div>
-        <div id="step-login" class="hidden">
-            <h2 id="login-title">Logowanie Kodem</h2>
-            <form method="POST">
-                <input type="hidden" name="action" value="login_by_code"><input type="hidden" name="target_table" id="target_table">
-                <input type="password" name="user_code" placeholder="Kod dostępu" style="width:80%; padding:15px; border-radius:10px; margin-bottom:20px;">
-                <button type="submit" class="btn-wybor" style="width:60%; display:block; margin:auto;">Zaloguj się</button>
-            </form>
-        </div>
-    <?php else: ?>
-        <div id="step-mood">
-            <h2>Głosujesz jako: <span style="color:var(--primary)"><?php echo $_SESSION['identity']; ?></span></h2>
-            <div style="display:flex; justify-content:center; gap:20px; margin-top:30px; flex-wrap:wrap;">
-                <button onclick="handleMood('dobrze')" class="btn-wybor" style="background:var(--success); height:150px; width:180px;">Dobrze 😊</button>
-                <button onclick="handleMood('zle')" class="btn-wybor" style="background:var(--warning); color:black; height:150px; width:180px;">Źle 😐</button>
-                <button onclick="handleMood('fatalnie')" class="btn-wybor" style="background:var(--primary); height:150px; width:180px;">Fatalnie 😖</button>
-            </div>
-        </div>
+    </div>
 
-        <div id="step-reason" class="hidden">
-            <h2>Co jest powodem Twojego nastroju?</h2>
-            <p style="color:#888">Wybierz główną przyczynę:</p>
-            <div class="reason-list">
-                <?php 
-                $powody = ["Zmiany hormonalne i dojrzewanie", "Presja szkolna", "Media społecznościowe", "Problemy rówieśnicze", "Trudności w domu", "Niedobór snu i styl życia", "Problemy emocjonalne i zdrowotne", "Inny powód"];
-                foreach($powody as $p): ?>
-                    <button class="btn-reason" onclick="finalSubmit('<?php echo $p; ?>')"><?php echo $p; ?></button>
-                <?php endforeach; ?>
-            </div>
-            <button onclick="showStep('step-mood')" style="background:none; border:none; color:gray; cursor:pointer;">← Wróć do wyboru nastroju</button>
-        </div>
+    <div id="step-profil" class="hidden">
+        <h2 style="margin-bottom:20px;">Wybierz swój profil</h2>
+        <div id="list-profile" class="grid-container"></div>
+        <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px;">← Wróć</button>
+    </div>
 
-        <form id="final-form" method="POST" class="hidden">
-            <input type="hidden" name="action" value="submit_vote">
-            <input type="hidden" name="mood" id="final-mood">
-            <input type="hidden" name="reason" id="final-reason">
-        </form>
-    <?php endif; ?>
+    <div id="step-grupa" class="hidden">
+        <h2 style="margin-bottom:20px;">Wybierz grupę</h2>
+        <div id="list-grupy" style="display:flex; justify-content:center; gap:20px;"></div>
+        <button onclick="showStep('step-profil')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px;">← Wróć</button>
+    </div>
+
+    <div id="step-login" class="hidden">
+        <h2 id="login-title">Logowanie Kodem</h2>
+        <div id="teacher-quote" class="quote-box hidden">„Dobrostan nauczyciela to dobrostan ucznia”</div>
+        <input type="password" id="user_code" placeholder="Wprowadź swój unikalny kod...">
+        <button onclick="handleLogin()" class="btn-wybor" style="display:block; margin: 20px auto; width: 60%;">Zaloguj się</button>
+        <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer;">Cofnij</button>
+    </div>
+
+    <div id="step-vote" class="hidden">
+        <h2 style="margin-bottom:10px;">Głosujesz jako: <span id="display-identity" style="color:var(--primary)"></span></h2>
+        <p style="color: #888; margin-bottom: 40px;">Jak się dzisiaj czujesz w szkole?</p>
+        <div style="display:flex; justify-content:center; gap:25px; margin-top:10px; flex-wrap:wrap;">
+            <button onclick="selectMood('dobrze')" class="btn-wybor" style="background:var(--success); height:150px; width:180px;">Dobrze 😊</button>
+            <button onclick="selectMood('zle')" class="btn-wybor" style="background:var(--warning); color:black; height:150px; width:180px;">Źle 😐</button>
+            <button onclick="selectMood('fatalnie')" class="btn-wybor" style="background:var(--primary); height:150px; width:180px;">Fatalnie 😖</button>
+        </div>
+    </div>
+
+    <div id="step-reason" class="hidden">
+        <h2 style="margin-bottom:10px;">Co jest powodem Twojego nastroju?</h2>
+        <p style="color: #888; margin-bottom: 20px;">Twoja odpowiedź pomoże nam lepiej zrozumieć sytuację w szkole.</p>
+        <div class="reason-list">
+            <button class="btn-reason" onclick="sendFinalVote('Zmiany hormonalne i dojrzewanie')">Zmiany hormonalne i dojrzewanie</button>
+            <button class="btn-reason" onclick="sendFinalVote('Presja szkolna')">Presja szkolna</button>
+            <button class="btn-reason" onclick="sendFinalVote('Media społecznościowe')">Media społecznościowe</button>
+            <button class="btn-reason" onclick="sendFinalVote('Problemy rówieśnicze')">Problemy rówieśnicze</button>
+            <button class="btn-reason" onclick="sendFinalVote('Trudności w domu')">Trudności w domu</button>
+            <button class="btn-reason" onclick="sendFinalVote('Niedobór snu i styl życia')">Niedobór snu i styl życia</button>
+            <button class="btn-reason" onclick="sendFinalVote('Problemy emocjonalne i zdrowotne')">Problemy emocjonalne i zdrowotne</button>
+        </div>
+        <button onclick="showStep('step-vote')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">← Wróć do wyboru nastroju</button>
+    </div>
 </div>
 
-<div id="modal-admin" class="modal">...</div>
-
 <footer>
-    © 2026 Dobrostan dla ZSTiO Jarosław. <br>
-    Zaprojektowane i stworzone przez: <strong>Stanisław Słabicki</strong>.
+    © 2026 Dobrostan dla ZSTiO Jarosław. <br><br>
+    Zaprojektowane i stworzone przez: <strong>Stanisław Słabicki</strong>
 </footer>
 
 <script>
-    // Skrypty nawigacji (selectYear, selectGroup, prepareLogin - bez zmian)
-    
-    let selectedMood = "";
-
-    function handleMood(mood) {
-        selectedMood = mood;
-        if(mood === 'zle' || mood === 'fatalnie') {
-            showStep('step-reason');
-        } else {
-            finalSubmit("Brak (Nastroj Dobry)");
-        }
-    }
-
-    function finalSubmit(reason) {
-        document.getElementById('final-mood').value = selectedMood;
-        document.getElementById('final-reason').value = reason;
-        
-        if(selectedMood === 'fatalnie') {
-            if(confirm('Pamiętaj, że nie jesteś sam/a. Czy chcesz zobaczyć, gdzie szukać pomocy?')) {
-                window.open('https://twarzedepresji.pl/pomoc-dla-dzieci-i-mlodziezy/', '_blank');
-            }
-        }
-        document.getElementById('final-form').submit();
-    }
+    const CONFIG = {'1':['TE','TG','TI','TM','TP','TS' ,'BS','BK'],'2':['TE','TI','TP','TS','BK','BS'],'3':['TA','TE','TI','TM','TP','TS','BK','BS'],'4':['TE','TG','TI','TM','TP','TS','TT'],'5':['TE','TG','TI','TP','TS']};
+    let currentTable = "";
+    let currentMood = "";
 
     function showStep(id) {
-        const steps = ['step-rocznik', 'step-profil', 'step-grupa', 'step-login', 'step-mood', 'step-reason'];
-        steps.forEach(s => { if(document.getElementById(s)) document.getElementById(s).classList.add('hidden'); });
+        document.querySelectorAll('#sekcja-glowna > div').forEach(div => div.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
     }
 
-    // ... reszta CONFIG i funkcji pomocniczych ...
+    function selectYear(y) {
+        const cont = document.getElementById('list-profile'); cont.innerHTML = '';
+        CONFIG[y].forEach(p => {
+            let b = document.createElement('button'); b.className = 'btn-wybor'; b.innerText = p;
+            b.onclick = () => { if(['TG','TI','BS','BK','TT'].includes(p)) prepareLogin(y+p); else selectGroup(y+p); };
+            cont.appendChild(b);
+        });
+        showStep('step-profil');
+    }
+
+    function selectGroup(prefix) {
+        const cont = document.getElementById('list-grupy'); cont.innerHTML = '';
+        const grp = prefix.includes('TM') ? ['_Automatyk','_Mechanik'] : ['G1','G2'];
+        grp.forEach(g => {
+            let b = document.createElement('button'); b.className = 'btn-wybor'; b.innerText = g.replace('_','');
+            b.onclick = () => prepareLogin(prefix+g); cont.appendChild(b);
+        });
+        showStep('step-grupa');
+    }
+
+    function prepareLogin(table) {
+        currentTable = table;
+        document.getElementById('login-title').innerText = table === 'Nauczyciele' ? "Ankieta Nauczyciela" : "Klasa " + table;
+        showStep('step-login');
+    }
+
+    function handleLogin() {
+        const kod = document.getElementById('user_code').value;
+        if(kod.length > 0) { // Tutaj normalnie byłby fetch do API
+            document.getElementById('display-identity').innerText = currentTable;
+            document.getElementById('btn-teacher').classList.add('hidden');
+            document.getElementById('btn-logout').classList.remove('hidden');
+            showStep('step-vote');
+        } else { alert('Wprowadź kod!'); }
+    }
+
+    function selectMood(mood) {
+        currentMood = mood;
+        if(mood === 'dobrze') {
+            sendFinalVote('Brak (nastroj dobry)');
+        } else {
+            showStep('step-reason');
+        }
+    }
+
+    async function sendFinalVote(reason) {
+        const payload = {
+            tabela: currentTable,
+            nastroj: currentMood,
+            powod: reason
+        };
+
+        console.log("Wysyłanie głosu:", payload);
+
+        // Przykładowy fetch do Twojego API (odkomentuj i ustaw URL gdy będziesz gotowy)
+        /*
+        const res = await fetch('/api/vote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        */
+
+        if (currentMood === 'fatalnie') {
+            alert('Dziękujemy za głos. Pamiętaj, że nie jesteś sam/a. Możesz szukać pomocy u pedagoga szkolnego.');
+        } else {
+            alert('Dziękujemy za oddanie głosu!');
+        }
+        
+        location.reload(); 
+    }
 </script>
 </body>
 </html>
