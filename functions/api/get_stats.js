@@ -7,11 +7,11 @@ router.get('/', (req, res) => {
 
     if (type === 'list') {
         db.query("SELECT DISTINCT kto FROM Wyniki", (err, results) => {
-            if (err) return res.status(500).send(err);
+            if (err) return res.status(500).json({ error: err.message });
             res.json(results.map(r => r.kto));
         });
     } else {
-        let query = "SELECT * FROM Wyniki"; // Pobieramy wszystko, żeby mieć historię
+        let query = "SELECT nastroj, kto, data_dodania FROM Wyniki";
         let params = [];
 
         if (filter && filter !== 'all') {
@@ -20,16 +20,14 @@ router.get('/', (req, res) => {
         }
 
         db.query(query, params, (err, results) => {
-            if (err) return res.status(500).send(err);
+            if (err) return res.status(500).json({ error: err.message });
 
-            // Obliczamy statystyki na podstawie pobranych danych
-            const stats = {
+            res.json({
                 dobrze: results.filter(r => r.nastroj === 'dobrze').length,
                 zle: results.filter(r => r.nastroj === 'zle').length,
                 fatalnie: results.filter(r => r.nastroj === 'fatalnie').length,
-                historia: results // DODAJEMY TO: cała lista dla popupu
-            };
-            res.json(stats);
+                historia: results
+            });
         });
     }
 });
