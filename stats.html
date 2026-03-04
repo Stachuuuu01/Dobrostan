@@ -99,32 +99,42 @@
             } catch (e) { console.error(e); }
         }
 
-        async function updateStats() {
-            const filter = document.getElementById('filter').value;
-            try {
-                const res = await fetch(`/api/get_stats?filter=${filter}`);
-                const data = await res.json();
-                
-                // Przypisanie danych z obiektu stats wysyłanego przez poprawiony get_stats.js
-                fullHistory = data.historia || []; 
-                const d = data.dobrze || 0;
-                const z = data.zle || 0;
-                const f = data.fatalnie || 0;
-                const total = d + z + f;
-
-                document.getElementById('total').innerText = total;
-
-                if (total > 0) {
-                    document.getElementById('p-dobrze').innerText = Math.round((d/total)*100) + "%";
-                    document.getElementById('p-zle').innerText = Math.round((z/total)*100) + "%";
-                    document.getElementById('p-fatalnie').innerText = Math.round((f/total)*100) + "%";
-                } else {
-                    document.querySelectorAll('.val:not(#total)').forEach(el => el.innerText = "0%");
-                }
-                
-                renderChart(d, z, f);
-            } catch (e) { console.error("Błąd aktualizacji frontendu:", e); }
+    async function updateStats() {
+    const filter = document.getElementById('filter').value;
+    try {
+        // Upewnij się, że ta ścieżka pasuje do tego, co masz w app.js
+        const res = await fetch(`/api/get_stats?filter=${filter}`);
+        
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            const text = await res.text();
+            console.error("Serwer zwrócił HTML zamiast JSON. Oto co przyszło:", text);
+            throw new Error("Serwer nie zwrócił danych JSON. Prawdopodobnie błąd ścieżki (404) lub brak zalogowania.");
         }
+
+        const data = await res.json();
+        
+        fullHistory = data.historia || []; 
+        const d = data.dobrze || 0;
+        const z = data.zle || 0;
+        const f = data.fatalnie || 0;
+        const total = d + z + f;
+
+        document.getElementById('total').innerText = total;
+
+        if (total > 0) {
+            document.getElementById('p-dobrze').innerText = Math.round((d/total)*100) + "%";
+            document.getElementById('p-zle').innerText = Math.round((z/total)*100) + "%";
+            document.getElementById('p-fatalnie').innerText = Math.round((f/total)*100) + "%";
+        } else {
+            document.querySelectorAll('.val:not(#total)').forEach(el => el.innerText = "0%");
+        }
+        
+        renderChart(d, z, f);
+    } catch (e) { 
+        console.error("Błąd aktualizacji:", e);
+    }
+}
 
         function renderChart(d, z, f) {
             const ctx = document.getElementById('chart').getContext('2d');
