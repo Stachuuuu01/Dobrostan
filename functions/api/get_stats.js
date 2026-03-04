@@ -1,6 +1,8 @@
-const db = context.env.baza;
-const { searchParams } = new URL(context.request.url);
-const filter = searchParams.get('filter') || 'all';
+export async function onRequestGet(context) {
+  try {
+    const db = context.env.baza;
+    const { searchParams } = new URL(context.request.url);
+    const filter = searchParams.get('filter') || 'all';
     const type = searchParams.get('type');
 
     // NOWOŚĆ: Pobieranie listy wszystkich klas/osób do dropdowna
@@ -13,18 +15,29 @@ const filter = searchParams.get('filter') || 'all';
     }
 
     // Logika statystyk (bez zmian, tylko dopasowana do Twojej bazy)
-let query = "SELECT nastroj, COUNT(*) as count FROM Wyniki";
-let params = [];
+    let query = "SELECT nastroj, COUNT(*) as count FROM Wyniki";
+    let params = [];
 
-    // Używamy kolumny 'kto' zamiast 'klasa'
-if (filter !== 'all') {
-query += " WHERE kto = ?";
-params.push(filter);
-@@ -17,7 +27,6 @@ export async function onRequestGet(context) {
+    if (filter !== 'all') {
+      query += " WHERE kto = ?";
+      params.push(filter);
+    }
 
-const results = await db.prepare(query).bind(...params).all();
+    query += " GROUP BY nastroj";
 
-    // Tworzymy obiekt z wynikami, upewniając się, że nazwy nastrojów pasują (dobrze, zle, fatalnie)
-const stats = { dobrze: 0, zle: 0, fatalnie: 0 };
-results.results.forEach(row => {
-if (stats.hasOwnProperty(row.nastroj)) {
+    const results = await db.prepare(query).bind(...params).all();
+    
+    const stats = { dobrze: 0, zle: 0, fatalnie: 0 };
+    results.results.forEach(row => {
+      if (stats.hasOwnProperty(row.nastroj)) {
+        stats[row.nastroj] = row.count;
+      }
+    });
+
+    return new Response(JSON.stringify(stats), {
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+  }
+}
