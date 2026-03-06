@@ -83,7 +83,7 @@
     </div>
 
     <div id="step-reason" class="hidden">
-        <h2 id="reason-header" style="margin-bottom:10px;">Co jest powodem Twojego nastroju?</h2>
+        <h2 id="reason-header" style="margin-bottom:10px; color:var(--warning);">Co wpływa na Twój gorszy nastrój?</h2>
         <p style="color: #888; margin-bottom: 20px;">Wybierz główną przyczynę:</p>
         <div class="reason-stack">
             <button class="btn-reason" onclick="sendVote('Zmiany hormonalne i dojrzewanie')">Zmiany hormonalne i dojrzewanie</button>
@@ -170,21 +170,12 @@
 
     function handleMoodSelection(mood) {
         selectedMood = mood;
-        const reasonHeader = document.getElementById('reason-header');
-
-        if (mood === 'dobrze') {
-            // Jeśli dobrze - wysyłamy od razu (brak powodu)
-            sendVote(null); 
-        } else if (mood === 'zle') {
-            // Jeśli źle - pokazujemy powody
-            reasonHeader.innerText = "Co wpływa na Twój gorszy nastrój?";
-            reasonHeader.style.color = "var(--warning)";
+        if (mood === 'zle') {
+            // Tylko dla "Źle" pokazujemy listę powodów
             showStep('step-reason');
-        } else if (mood === 'fatalnie') {
-            // Jeśli fatalnie - pokazujemy powody
-            reasonHeader.innerText = "Co jest przyczyną tak złego samopoczucia?";
-            reasonHeader.style.color = "var(--primary)";
-            showStep('step-reason');
+        } else {
+            // Dla "Dobrze" i "Fatalnie" wysyłamy od razu
+            sendVote(null);
         }
     }
 
