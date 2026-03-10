@@ -170,32 +170,50 @@
 
     function handleMoodSelection(mood) {
         selectedMood = mood;
-        if (mood === 'zle') {
-            // Tylko dla "Źle" pokazujemy listę powodów
-            showStep('step-reason');
+        // Zmieniamy nagłówek w zależności od wyboru
+        const header = document.getElementById('reason-header');
+        if(mood === 'fatalnie') {
+            header.innerText = "Co sprawia, że czujesz się fatalnie?";
+            header.style.color = "var(--primary)";
         } else {
-            // Dla "Dobrze" i "Fatalnie" wysyłamy od razu
+            header.innerText = "Co wpływa na Twój gorszy nastrój?";
+            header.style.color = "var(--warning)";
+        }
+
+        if (mood === 'dobrze') {
             sendVote(null);
+        } else {
+            showStep('step-reason');
         }
     }
 
     async function sendVote(reason) {
-        const res = await fetch('/api/vote', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nastroj: selectedMood, tabela: currentTable, powod: reason })
-        });
-        if(res.ok) { 
-            if (selectedMood === 'fatalnie') {
-                if (confirm('Dziękujemy za głos. Pamiętaj, że nie jesteś sam/a. Czy chcesz zobaczyć, gdzie szukać pomocy i wsparcia?')) {
-                    window.open('https://twarzedepresji.pl/pomoc-dla-dzieci-i-mlodziezy/', '_blank');
+        try {
+            const res = await fetch('/api/vote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nastroj: selectedMood, tabela: currentTable, powod: reason })
+            });
+
+            if(res.ok) { 
+                if (selectedMood === 'fatalnie') {
+                    // Najpierw pytamy o pomoc
+                    const help = confirm('Dziękujemy za głos. Pamiętaj, że nie jesteś sam/a. Czy chcesz zobaczyć, gdzie szukać pomocy i wsparcia?');
+                    if (help) {
+                        window.open('https://twarzedepresji.pl/pomoc-dla-dzieci-i-mlodziezy/', '_blank');
+                    }
+                } else {
+                    alert('Dziękujemy za głos!'); 
                 }
+                // Przeładowanie strony z lekkim opóźnieniem, aby przeglądarka zdążyła otworzyć link
+                setTimeout(() => {
+                    location.reload();
+                }, 300);
             } else {
-                alert('Dziękujemy za głos!'); 
+                alert('Błąd zapisu głosu.');
             }
-            location.reload(); 
-        } else {
-            alert('Błąd zapisu głosu.');
+        } catch (error) {
+            alert('Błąd połączenia z serwerem.');
         }
     }
 
