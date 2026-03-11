@@ -26,7 +26,6 @@
         .reason-stack { display: flex; flex-direction: column; gap: 10px; max-width: 500px; margin: 20px auto; }
         .btn-reason { text-align: left; padding: 15px 20px; background: #222; border: 1px solid #444; color: white; border-radius: 10px; cursor: pointer; transition: 0.3s; font-size: 1rem; }
         .btn-reason:hover { background: var(--primary); border-color: var(--primary); transform: translateX(10px); }
-        
         #extra-desc-box { margin-top: 25px; padding-top: 20px; border-top: 1px solid #333; }
     </style>
 </head>
@@ -86,7 +85,7 @@
 
     <div id="step-reason" class="hidden">
         <h2 id="reason-header" style="margin-bottom:10px; color:var(--warning);">Co wpływa na Twój gorszy nastrój?</h2>
-        <p style="color: #888; margin-bottom: 20px;">Wybierz główną przyczynę lub opisz problem poniżej:</p>
+        <p style="color: #888; margin-bottom: 20px;">Wybierz główną przyczynę:</p>
         
         <div class="reason-stack">
             <button class="btn-reason" onclick="sendVote('Zmiany hormonalne i dojrzewanie')">Zmiany hormonalne i dojrzewanie</button>
@@ -98,7 +97,7 @@
             <button class="btn-reason" onclick="sendVote('Problemy emocjonalne i zdrowotne')">Problemy emocjonalne i zdrowotne</button>
         </div>
 
-        <div id="extra-desc-box">
+        <div id="extra-desc-box" class="hidden">
             <p style="color: #ccc; margin-bottom: 10px;">Czy chcesz rozwinąć swój problem?</p>
             <button id="btn-show-textarea" class="btn-wybor" style="background: #444; font-size: 0.9rem; padding: 10px 20px;" onclick="showTextArea()">Tak, chcę opisać</button>
             
@@ -135,12 +134,6 @@
     function showStep(id) {
         document.querySelectorAll('#sekcja-glowna > div').forEach(div => div.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
-        // Resetujemy widoczność pola tekstowego przy zmianie kroku
-        if(id === 'step-reason') {
-            document.getElementById('textarea-container').classList.add('hidden');
-            document.getElementById('btn-show-textarea').classList.remove('hidden');
-            document.getElementById('custom-reason-text').value = "";
-        }
     }
 
     function selectYear(y) {
@@ -190,18 +183,21 @@
 
     function handleMoodSelection(mood) {
         selectedMood = mood;
-        const header = document.getElementById('reason-header');
+        const descBox = document.getElementById('extra-desc-box');
         
-        if(mood === 'fatalnie') {
-            header.innerText = "Co sprawia, że czujesz się fatalnie?";
-            header.style.color = "var(--primary)";
-            showStep('step-reason'); // Pozwalamy opisać powód nawet przy fatalnie
-        } else if (mood === 'zle') {
-            header.innerText = "Co wpływa na Twój gorszy nastrój?";
-            header.style.color = "var(--warning)";
+        // Resetujemy widoczność pola tekstowego przy każdym wyborze nastroju
+        document.getElementById('textarea-container').classList.add('hidden');
+        document.getElementById('btn-show-textarea').classList.remove('hidden');
+        document.getElementById('custom-reason-text').value = "";
+
+        if (mood === 'zle') {
+            descBox.classList.remove('hidden'); // Pokaż opcję opisu tylko dla 'Źle'
             showStep('step-reason');
+        } else if (mood === 'fatalnie') {
+            descBox.classList.add('hidden'); // Ukryj opcję opisu dla 'Fatalnie'
+            sendVote(null); // Głos wysyłany od razu (z alertem pomocy w sendVote)
         } else {
-            sendVote(null); // Dla 'dobrze' wysyłamy od razu
+            sendVote(null); // Dla 'dobrze'
         }
     }
 
@@ -216,7 +212,7 @@
             alert("Proszę wpisz coś lub wybierz kategorię z listy powyżej.");
             return;
         }
-        sendVote("Opis: " + text);
+        sendVote("Opis własny: " + text);
     }
 
     async function sendVote(reason) {
