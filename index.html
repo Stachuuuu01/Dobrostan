@@ -19,13 +19,15 @@
         .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 30px; }
         .modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); display:none; justify-content:center; align-items:center; z-index:999; backdrop-filter: blur(5px); }
         .hidden { display: none; }
-        input { width: 85%; padding: 15px; margin: 15px 0; border-radius: 10px; background: #2a2a2a; color: white; border: 1px solid #444; text-align: center; font-size: 1.1rem; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(220, 53, 69, 0.3); }
+        input, textarea { width: 85%; padding: 15px; margin: 15px 0; border-radius: 10px; background: #2a2a2a; color: white; border: 1px solid #444; text-align: center; font-size: 1.1rem; outline: none; transition: 0.3s; font-family: inherit; }
+        input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(220, 53, 69, 0.3); }
         footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-align: center; letter-spacing: 1px; }
         
         .reason-stack { display: flex; flex-direction: column; gap: 10px; max-width: 500px; margin: 20px auto; }
         .btn-reason { text-align: left; padding: 15px 20px; background: #222; border: 1px solid #444; color: white; border-radius: 10px; cursor: pointer; transition: 0.3s; font-size: 1rem; }
         .btn-reason:hover { background: var(--primary); border-color: var(--primary); transform: translateX(10px); }
+        
+        #extra-desc-box { margin-top: 25px; padding-top: 20px; border-top: 1px solid #333; }
     </style>
 </head>
 <body>
@@ -84,7 +86,8 @@
 
     <div id="step-reason" class="hidden">
         <h2 id="reason-header" style="margin-bottom:10px; color:var(--warning);">Co wpływa na Twój gorszy nastrój?</h2>
-        <p style="color: #888; margin-bottom: 20px;">Wybierz główną przyczynę:</p>
+        <p style="color: #888; margin-bottom: 20px;">Wybierz główną przyczynę lub opisz problem poniżej:</p>
+        
         <div class="reason-stack">
             <button class="btn-reason" onclick="sendVote('Zmiany hormonalne i dojrzewanie')">Zmiany hormonalne i dojrzewanie</button>
             <button class="btn-reason" onclick="sendVote('Presja szkolna')">Presja szkolna</button>
@@ -94,6 +97,17 @@
             <button class="btn-reason" onclick="sendVote('Niedobór snu i styl życia')">Niedobór snu i styl życia</button>
             <button class="btn-reason" onclick="sendVote('Problemy emocjonalne i zdrowotne')">Problemy emocjonalne i zdrowotne</button>
         </div>
+
+        <div id="extra-desc-box">
+            <p style="color: #ccc; margin-bottom: 10px;">Czy chcesz rozwinąć swój problem?</p>
+            <button id="btn-show-textarea" class="btn-wybor" style="background: #444; font-size: 0.9rem; padding: 10px 20px;" onclick="showTextArea()">Tak, chcę opisać</button>
+            
+            <div id="textarea-container" class="hidden">
+                <textarea id="custom-reason-text" placeholder="Opisz krótko co się dzieje (opcjonalnie)..." rows="4"></textarea>
+                <button class="btn-wybor" style="display:block; margin: 10px auto; width: 60%;" onclick="sendVoteWithText()">Wyślij z opisem</button>
+            </div>
+        </div>
+
         <button onclick="showStep('step-vote')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">← Wróć do nastroju</button>
     </div>
 </div>
@@ -121,6 +135,12 @@
     function showStep(id) {
         document.querySelectorAll('#sekcja-glowna > div').forEach(div => div.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
+        // Resetujemy widoczność pola tekstowego przy zmianie kroku
+        if(id === 'step-reason') {
+            document.getElementById('textarea-container').classList.add('hidden');
+            document.getElementById('btn-show-textarea').classList.remove('hidden');
+            document.getElementById('custom-reason-text').value = "";
+        }
     }
 
     function selectYear(y) {
@@ -170,21 +190,33 @@
 
     function handleMoodSelection(mood) {
         selectedMood = mood;
-        // Zmieniamy nagłówek w zależności od wyboru
         const header = document.getElementById('reason-header');
+        
         if(mood === 'fatalnie') {
             header.innerText = "Co sprawia, że czujesz się fatalnie?";
             header.style.color = "var(--primary)";
-        } else {
+            showStep('step-reason'); // Pozwalamy opisać powód nawet przy fatalnie
+        } else if (mood === 'zle') {
             header.innerText = "Co wpływa na Twój gorszy nastrój?";
             header.style.color = "var(--warning)";
-        }
-
-        if (mood === 'dobrze' || mood === 'fatalnie') {
-            sendVote(null);
-        } else {
             showStep('step-reason');
+        } else {
+            sendVote(null); // Dla 'dobrze' wysyłamy od razu
         }
+    }
+
+    function showTextArea() {
+        document.getElementById('textarea-container').classList.remove('hidden');
+        document.getElementById('btn-show-textarea').classList.add('hidden');
+    }
+
+    function sendVoteWithText() {
+        const text = document.getElementById('custom-reason-text').value;
+        if(!text.trim()) {
+            alert("Proszę wpisz coś lub wybierz kategorię z listy powyżej.");
+            return;
+        }
+        sendVote("Opis: " + text);
     }
 
     async function sendVote(reason) {
@@ -197,7 +229,6 @@
 
             if(res.ok) { 
                 if (selectedMood === 'fatalnie') {
-                    // Najpierw pytamy o pomoc
                     const help = confirm('Dziękujemy za głos. Pamiętaj, że nie jesteś sam/a. Czy chcesz zobaczyć, gdzie szukać pomocy i wsparcia?');
                     if (help) {
                         window.open('https://twarzedepresji.pl/pomoc-dla-dzieci-i-mlodziezy/', '_blank');
@@ -205,7 +236,6 @@
                 } else {
                     alert('Dziękujemy za głos!'); 
                 }
-                // Przeładowanie strony z lekkim opóźnieniem, aby przeglądarka zdążyła otworzyć link
                 setTimeout(() => {
                     location.reload();
                 }, 300);
