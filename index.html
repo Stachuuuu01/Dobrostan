@@ -180,7 +180,7 @@
             header.style.color = "var(--warning)";
         }
 
-        if (mood === 'dobrze') {
+        if (mood === 'dobrze' || mood === 'fatalnie') {
             sendVote(null);
         } else {
             showStep('step-reason');
