@@ -5,179 +5,930 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Statystyk PRO - ZSTiO</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #dc3545; --bg: #0d0d0d; --card-bg: #1a1a1a; --success: #28a745; --warning: #ffc107; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; }
-        
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: #111; border-bottom: 1px solid #333; }
-        .btn-logout { background: transparent; border: 1px solid #555; color: #aaa; padding: 8px 15px; border-radius: 6px; cursor: pointer; }
+        :root {
+            --primary: #dc3545;
+            --bg: #080808;
+            --surface: #111111;
+            --surface2: #181818;
+            --border: #232323;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text: #f0f0f0;
+            --muted: #555;
+            --accent: #dc3545;
+        }
 
-        .content { padding: 20px; }
-        .stats-grid { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin: 20px 0; }
-        
-        .stat-card { 
-            background: linear-gradient(145deg, #222, #1a1a1a); 
-            padding: 25px; border-radius: 20px; min-width: 160px; border: 1px solid #333; 
-            cursor: pointer; transition: 0.3s;
-        }
-        .stat-card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        
-        .val { font-size: 2.5rem; font-weight: 800; display: block; margin-top: 10px; }
-        .label { color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; }
-        
-        #chart-container { max-width: 400px; margin: 30px auto; cursor: pointer; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* MODAL / POPUP */
-        .modal { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.95); display: none; /* Ukryty domyślnie */
-            justify-content: center; align-items: center; z-index: 9999; 
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        .modal-content { 
-            background: #1a1a1a; padding: 30px; border-radius: 25px; width: 90%; max-width: 500px; 
-            border: 1px solid #444; max-height: 70vh; overflow-y: auto; 
+
+        /* Subtle grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(220,53,69,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(220,53,69,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
         }
-        .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #333; }
-        
-        .detail-item { 
-            display: flex; justify-content: space-between; padding: 12px; 
-            border-bottom: 1px solid #222; font-size: 0.9rem; text-align: left;
+
+        /* TOP BAR */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(8,8,8,0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        .detail-item span:first-child { font-weight: bold; color: #5dade2; }
-        .detail-item span:last-child { color: #777; font-family: monospace; }
-        
-        .close-btn { cursor: pointer; font-size: 1.5rem; color: #ff4444; }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .topbar-logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .topbar-logo span {
+            color: var(--primary);
+        }
+
+        .topbar-badge {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            background: rgba(220,53,69,0.1);
+            color: var(--primary);
+            border: 1px solid rgba(220,53,69,0.2);
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .live-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--success);
+            letter-spacing: 1px;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 7px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        .btn-logout:hover { border-color: #555; color: #aaa; }
+
+        /* MAIN LAYOUT */
+        .main {
+            position: relative;
+            z-index: 1;
+            padding: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* PAGE HEADER */
+        .page-header {
+            margin-bottom: 36px;
+            animation: fadeUp 0.5s ease both;
+        }
+
+        .page-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 2.4rem;
+            letter-spacing: -1px;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .page-title span { color: var(--primary); }
+
+        .page-subtitle {
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-family: 'DM Mono', monospace;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* KPI STRIP */
+        .kpi-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+            animation: fadeUp 0.5s 0.1s ease both;
+        }
+
+        .kpi {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 22px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .kpi:hover { transform: translateY(-2px); }
+
+        .kpi::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+        }
+
+        .kpi.total::before { background: linear-gradient(90deg, #555, #333); }
+        .kpi.good::before { background: var(--success); }
+        .kpi.bad::before { background: var(--warning); }
+        .kpi.fatal::before { background: var(--danger); }
+
+        .kpi-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 1.5px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .kpi-value {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 2.2rem;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .kpi.total .kpi-value { color: #fff; }
+        .kpi.good .kpi-value { color: var(--success); }
+        .kpi.bad .kpi-value { color: var(--warning); }
+        .kpi.fatal .kpi-value { color: var(--danger); }
+
+        .kpi-pct {
+            font-size: 0.8rem;
+            color: var(--muted);
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* GRID: chart + table */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+            animation: fadeUp 0.5s 0.2s ease both;
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: -0.3px;
+        }
+
+        .panel-body {
+            padding: 22px;
+        }
+
+        /* CHART PANEL */
+        .chart-wrap {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+        }
+
+        .chart-center {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .chart-center-num {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.8rem;
+            line-height: 1;
+        }
+
+        .chart-center-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .legend-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 8px 10px;
+            border-radius: 8px;
+            transition: background 0.15s;
+            border: 1px solid transparent;
+        }
+
+        .legend-item:hover { background: var(--surface2); border-color: var(--border); }
+        .legend-item.active { background: var(--surface2); border-color: var(--border); }
+
+        .legend-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-name {
+            flex: 1;
+            font-size: 0.85rem;
+        }
+
+        .legend-count {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        /* FILTER BAR */
+        .filter-bar {
+            padding: 14px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-select {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .filter-select:focus { border-color: var(--primary); }
+
+        .filter-input {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.82rem;
+            outline: none;
+            flex: 1;
+            min-width: 160px;
+            transition: border-color 0.2s;
+        }
+
+        .filter-input:focus { border-color: var(--primary); }
+        .filter-input::placeholder { color: var(--muted); }
+
+        .filter-pill {
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 0.78rem;
+            font-family: 'DM Mono', monospace;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            transition: 0.15s;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-pill:hover { color: #fff; border-color: #555; }
+        .filter-pill.active-all { color: #fff; border-color: #555; background: var(--surface2); }
+        .filter-pill.active-good { color: var(--success); border-color: var(--success); background: rgba(34,197,94,0.08); }
+        .filter-pill.active-bad { color: var(--warning); border-color: var(--warning); background: rgba(245,158,11,0.08); }
+        .filter-pill.active-fatal { color: var(--danger); border-color: var(--danger); background: rgba(239,68,68,0.08); }
+
+        /* VOTES TABLE */
+        .votes-table-wrap {
+            overflow-y: auto;
+            max-height: 420px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        thead th {
+            padding: 10px 16px;
+            text-align: left;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 1.5px;
+            color: var(--muted);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #151515;
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover { background: var(--surface2); }
+
+        td {
+            padding: 11px 16px;
+            vertical-align: middle;
+        }
+
+        .td-class {
+            font-family: 'DM Mono', monospace;
+            font-weight: 500;
+            font-size: 0.82rem;
+            color: #5dade2;
+        }
+
+        .td-mood {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .mood-badge {
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 0.72rem;
+            font-family: 'DM Mono', monospace;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .mood-badge.dobrze { background: rgba(34,197,94,0.12); color: var(--success); border: 1px solid rgba(34,197,94,0.2); }
+        .mood-badge.zle { background: rgba(245,158,11,0.12); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
+        .mood-badge.fatalnie { background: rgba(239,68,68,0.12); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+
+        .td-reason {
+            color: #aaa;
+            font-size: 0.8rem;
+            max-width: 260px;
+        }
+
+        .td-reason.no-reason {
+            color: #383838;
+            font-style: italic;
+        }
+
+        .td-time {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--muted);
+        }
+
+        .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .empty-state p { font-size: 0.85rem; font-family: 'DM Mono', monospace; }
+
+        /* REASONS PANEL */
+        .reasons-grid {
+            animation: fadeUp 0.5s 0.3s ease both;
+        }
+
+        .reason-bar-item {
+            margin-bottom: 14px;
+        }
+
+        .reason-bar-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.82rem;
+        }
+
+        .reason-bar-name { color: #ccc; }
+        .reason-bar-count {
+            font-family: 'DM Mono', monospace;
+            color: var(--muted);
+            font-size: 0.75rem;
+        }
+
+        .reason-bar-track {
+            height: 5px;
+            background: #1f1f1f;
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .reason-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, var(--primary), #ff6b6b);
+            transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        /* SCROLL */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #282828; border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: #333; }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+            .main { padding: 16px; }
+        }
+
+        /* ANIMATIONS */
+        .row-enter {
+            animation: rowFadeIn 0.25s ease both;
+        }
+
+        @keyframes rowFadeIn {
+            from { opacity: 0; transform: translateX(-8px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .count-anim {
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <span>ZSTiO Jarosław • Admin</span>
-        <button class="btn-logout" onclick="location.href='/'">Wyloguj</button>
+<div class="topbar">
+    <div class="topbar-left">
+        <div class="topbar-logo">ZST<span>iO</span> Jarosław</div>
+        <div class="topbar-badge">ADMIN</div>
+    </div>
+    <div class="topbar-right">
+        <div class="live-dot"></div>
+        <span class="live-label">LIVE</span>
+        <button class="btn-logout" onclick="location.href='/'">← Wyloguj</button>
+    </div>
+</div>
+
+<div class="main">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="page-title">Analiza <span>Dobrostanu</span></div>
+        <div class="page-subtitle" id="last-update">Ładowanie danych...</div>
     </div>
 
-    <div class="content">
-        <h1>📊 Analiza Dobrostanu</h1>
-
-        <div id="chart-container">
-            <canvas id="chart"></canvas>
+    <!-- KPI STRIP -->
+    <div class="kpi-strip">
+        <div class="kpi total">
+            <div class="kpi-label">Wszystkie głosy</div>
+            <div class="kpi-value count-anim" id="kpi-total">0</div>
+            <div class="kpi-pct">dzisiaj + archiwum</div>
         </div>
-
-        <div class="stats-grid">
-            <div class="stat-card" onclick="showDetails('dobrze')">
-                <span class="label">Dobrze</span>
-                <span id="p-dobrze" class="val" style="color: var(--success);">0%</span>
-            </div>
-            <div class="stat-card" onclick="showDetails('zle')">
-                <span class="label">Źle</span>
-                <span id="p-zle" class="val" style="color: var(--warning);">0%</span>
-            </div>
-            <div class="stat-card" onclick="showDetails('fatalnie')">
-                <span class="label">Fatalnie</span>
-                <span id="p-fatalnie" class="val" style="color: var(--primary);">0%</span>
-            </div>
+        <div class="kpi good">
+            <div class="kpi-label">Dobrze 😊</div>
+            <div class="kpi-value count-anim" id="kpi-good">0</div>
+            <div class="kpi-pct" id="kpi-good-pct">–</div>
+        </div>
+        <div class="kpi bad">
+            <div class="kpi-label">Źle 😐</div>
+            <div class="kpi-value count-anim" id="kpi-bad">0</div>
+            <div class="kpi-pct" id="kpi-bad-pct">–</div>
+        </div>
+        <div class="kpi fatal">
+            <div class="kpi-label">Fatalnie 😖</div>
+            <div class="kpi-value count-anim" id="kpi-fatal">0</div>
+            <div class="kpi-pct" id="kpi-fatal-pct">–</div>
         </div>
     </div>
 
-    <div id="detailModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle" style="margin:0">Szczegóły</h2>
-                <span class="close-btn" onclick="closeModal()">✕</span>
+    <!-- MAIN GRID -->
+    <div class="dashboard-grid">
+
+        <!-- CHART PANEL -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">Rozkład nastrojów</span>
             </div>
-            <div id="modalList">
+            <div class="panel-body">
+                <div class="chart-wrap">
+                    <canvas id="chart"></canvas>
+                    <div class="chart-center">
+                        <div class="chart-center-num" id="chart-total">0</div>
+                        <div class="chart-center-label">głosów</div>
+                    </div>
                 </div>
+                <ul class="legend-list">
+                    <li class="legend-item" onclick="setFilter('dobrze')" data-mood="dobrze">
+                        <div class="legend-dot" style="background:var(--success)"></div>
+                        <span class="legend-name">Dobrze</span>
+                        <span class="legend-count" id="leg-good">0</span>
+                    </li>
+                    <li class="legend-item" onclick="setFilter('zle')" data-mood="zle">
+                        <div class="legend-dot" style="background:var(--warning)"></div>
+                        <span class="legend-name">Źle</span>
+                        <span class="legend-count" id="leg-bad">0</span>
+                    </li>
+                    <li class="legend-item" onclick="setFilter('fatalnie')" data-mood="fatalnie">
+                        <div class="legend-dot" style="background:var(--danger)"></div>
+                        <span class="legend-name">Fatalnie</span>
+                        <span class="legend-count" id="leg-fatal">0</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- VOTES TABLE PANEL -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">Szczegółowe głosy</span>
+                <span id="result-count" style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);">0 wyników</span>
+            </div>
+            <div class="filter-bar">
+                <button class="filter-pill active-all" onclick="setFilter('all')" id="pill-all">Wszystkie</button>
+                <button class="filter-pill" onclick="setFilter('dobrze')" id="pill-dobrze">😊 Dobrze</button>
+                <button class="filter-pill" onclick="setFilter('zle')" id="pill-zle">😐 Źle</button>
+                <button class="filter-pill" onclick="setFilter('fatalnie')" id="pill-fatalnie">😖 Fatalnie</button>
+                <input class="filter-input" id="search-input" placeholder="Szukaj klasy lub powodu..." oninput="renderTable()">
+                <select class="filter-select" id="sort-select" onchange="renderTable()">
+                    <option value="newest">Najnowsze</option>
+                    <option value="oldest">Najstarsze</option>
+                    <option value="class">Klasa A–Z</option>
+                </select>
+            </div>
+            <div class="votes-table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Klasa</th>
+                            <th>Nastrój</th>
+                            <th>Powód / Opis</th>
+                            <th>Data i godzina</th>
+                        </tr>
+                    </thead>
+                    <tbody id="votes-tbody">
+                        <tr><td colspan="4"><div class="empty-state"><div class="empty-icon">⏳</div><p>Ładowanie danych...</p></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <script>
-        let myChart;
-        let rawVotes = []; // Tu będą dane z API
+    <!-- REASONS PANEL -->
+    <div class="panel reasons-grid">
+        <div class="panel-header">
+            <span class="panel-title">Top powody złego samopoczucia</span>
+            <span style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted);">tylko głosy ZŁE + FATALNE</span>
+        </div>
+        <div class="panel-body" id="reasons-body">
+            <p style="color:var(--muted);font-size:0.85rem;font-family:'DM Mono',monospace;">Brak danych</p>
+        </div>
+    </div>
 
-        async function updateData() {
-            try {
-                const res = await fetch('/api/get_stats?details=true');
-                const data = await res.json();
-                
-                // Przypisujemy listę głosów (jeśli API ją wysyła)
-                rawVotes = data.raw_votes || []; 
-                
-                const d = data.dobrze || 0;
-                const z = data.zle || 0;
-                const f = data.fatalnie || 0;
-                const total = d + z + f;
+</div>
 
-                if(total > 0) {
-                    document.getElementById('p-dobrze').innerText = Math.round((d/total)*100) + "%";
-                    document.getElementById('p-zle').innerText = Math.round((z/total)*100) + "%";
-                    document.getElementById('p-fatalnie').innerText = Math.round((f/total)*100) + "%";
-                }
-                
-                drawChart(d, z, f);
-            } catch (e) { console.log("Błąd pobierania:", e); }
+<script>
+    let myChart;
+    let rawVotes = [];
+    let activeFilter = 'all';
+
+    // ─── FETCH DATA ───────────────────────────────────────────────────────────
+    async function updateData() {
+        try {
+            const res = await fetch('/api/get_stats?details=true');
+            const data = await res.json();
+
+            rawVotes = data.raw_votes || [];
+
+            const d = data.dobrze || 0;
+            const z = data.zle || 0;
+            const f = data.fatalnie || 0;
+            const total = d + z + f;
+
+            // KPI
+            animateCount('kpi-total', total);
+            animateCount('kpi-good', d);
+            animateCount('kpi-bad', z);
+            animateCount('kpi-fatal', f);
+            document.getElementById('chart-total').innerText = total;
+
+            if (total > 0) {
+                document.getElementById('kpi-good-pct').innerText = pct(d, total) + '% ogółu';
+                document.getElementById('kpi-bad-pct').innerText = pct(z, total) + '% ogółu';
+                document.getElementById('kpi-fatal-pct').innerText = pct(f, total) + '% ogółu';
+            }
+
+            // Legend
+            document.getElementById('leg-good').innerText = d;
+            document.getElementById('leg-bad').innerText = z;
+            document.getElementById('leg-fatal').innerText = f;
+
+            const now = new Date();
+            document.getElementById('last-update').innerText =
+                'Ostatnia aktualizacja: ' + now.toLocaleTimeString('pl-PL');
+
+            drawChart(d, z, f);
+            renderTable();
+            renderReasons();
+
+        } catch (e) {
+            console.error('Błąd pobierania:', e);
+            document.getElementById('last-update').innerText = 'Błąd połączenia z API';
+        }
+    }
+
+    // ─── CHART ───────────────────────────────────────────────────────────────
+    function drawChart(d, z, f) {
+        const ctx = document.getElementById('chart').getContext('2d');
+        const colors = ['#22c55e', '#f59e0b', '#ef4444'];
+
+        if (myChart) {
+            myChart.data.datasets[0].data = [d, z, f];
+            myChart.update('active');
+            return;
         }
 
-        function drawChart(d, z, f) {
-            const ctx = document.getElementById('chart').getContext('2d');
-            if (myChart) {
-                myChart.data.datasets[0].data = [d, z, f];
-                myChart.update();
-                return;
-            }
-            myChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['dobrze', 'zle', 'fatalnie'],
-                    datasets: [{
-                        data: [d, z, f],
-                        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
-                        borderWidth: 0,
-                        hoverOffset: 25
-                    }]
+        myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Dobrze', 'Źle', 'Fatalnie'],
+                datasets: [{
+                    data: [d, z, f],
+                    backgroundColor: colors,
+                    borderColor: '#111111',
+                    borderWidth: 3,
+                    hoverOffset: 12,
+                    hoverBorderWidth: 0
+                }]
+            },
+            options: {
+                cutout: '72%',
+                animation: { duration: 900, easing: 'easeInOutQuart' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1a1a1a',
+                        borderColor: '#333',
+                        borderWidth: 1,
+                        titleFont: { family: 'DM Mono', size: 11 },
+                        bodyFont: { family: 'DM Sans', size: 13 },
+                        padding: 10,
+                        callbacks: {
+                            label: (ctx) => ` ${ctx.label}: ${ctx.raw} głosów`
+                        }
+                    }
                 },
-                options: {
-                    cutout: '70%',
-                    plugins: { legend: { display: false } },
-                    onClick: (e, el) => {
-                        if(el.length > 0) showDetails(myChart.data.labels[el[0].index]);
+                onClick: (e, el) => {
+                    if (el.length > 0) {
+                        const labels = ['dobrze', 'zle', 'fatalnie'];
+                        setFilter(labels[el[0].index]);
                     }
                 }
-            });
-        }
-
-        function showDetails(mood) {
-            console.log("Otwieram detale dla:", mood); // Debug w konsoli
-            const modal = document.getElementById('detailModal');
-            const list = document.getElementById('modalList');
-            document.getElementById('modalTitle').innerText = "Głosy: " + mood.toUpperCase();
-            
-            list.innerHTML = "";
-            
-            // Filtrowanie głosów
-            const filtered = rawVotes.filter(v => v.nastroj === mood);
-
-            if(filtered.length === 0) {
-                list.innerHTML = "<p style='color:#666'>Brak szczegółowych danych w bazie dla tego nastroju.</p>";
-            } else {
-                filtered.forEach(v => {
-                    const item = document.createElement('div');
-                    item.className = 'detail-item';
-                    item.innerHTML = `<span>Klasa: ${v.kto}</span><span>${v.kiedy || ''}</span>`;
-                    list.appendChild(item);
-                });
             }
+        });
+    }
 
-            modal.style.display = "flex"; // POKAZUJEMY MODAL
+    // ─── FILTER ───────────────────────────────────────────────────────────────
+    function setFilter(mood) {
+        activeFilter = mood;
+
+        // Pills
+        const pills = { all: 'active-all', dobrze: 'active-good', zle: 'active-bad', fatalnie: 'active-fatal' };
+        ['all','dobrze','zle','fatalnie'].forEach(m => {
+            const pill = document.getElementById('pill-' + m);
+            pill.className = 'filter-pill';
+            if (m === mood) pill.classList.add(pills[m]);
+        });
+
+        // Legend highlight
+        document.querySelectorAll('.legend-item').forEach(li => {
+            li.classList.toggle('active', li.dataset.mood === mood);
+        });
+
+        renderTable();
+    }
+
+    // ─── TABLE ────────────────────────────────────────────────────────────────
+    function renderTable() {
+        const tbody = document.getElementById('votes-tbody');
+        const search = document.getElementById('search-input').value.toLowerCase();
+        const sort = document.getElementById('sort-select').value;
+
+        let votes = [...rawVotes];
+
+        // Filter mood
+        if (activeFilter !== 'all') {
+            votes = votes.filter(v => v.nastroj === activeFilter);
         }
 
-        function closeModal() {
-            document.getElementById('detailModal').style.display = "none";
+        // Search
+        if (search) {
+            votes = votes.filter(v =>
+                (v.kto || '').toLowerCase().includes(search) ||
+                (v.powod || '').toLowerCase().includes(search)
+            );
         }
 
-        // Zamykanie kliknięciem w tło
-        window.onclick = (e) => { if(e.target.id === 'detailModal') closeModal(); }
+        // Sort
+        if (sort === 'newest') votes.sort((a, b) => new Date(b.kiedy) - new Date(a.kiedy));
+        else if (sort === 'oldest') votes.sort((a, b) => new Date(a.kiedy) - new Date(b.kiedy));
+        else if (sort === 'class') votes.sort((a, b) => (a.kto || '').localeCompare(b.kto || ''));
 
-        updateData();
-    </script>
+        document.getElementById('result-count').innerText = votes.length + ' wyników';
+
+        if (votes.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <p>Brak wyników dla wybranych filtrów</p>
+            </div></td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = votes.map((v, i) => {
+            const moodLabel = { dobrze: 'dobrze', zle: 'źle', fatalnie: 'fatalnie' }[v.nastroj] || v.nastroj;
+            const hasReason = v.powod && v.powod !== 'null' && v.powod !== 'undefined';
+            const reasonHtml = hasReason
+                ? `<span class="td-reason">${escapeHtml(v.powod)}</span>`
+                : `<span class="td-reason no-reason">brak opisu</span>`;
+            const dateStr = formatDate(v.kiedy);
+
+            return `<tr class="row-enter" style="animation-delay:${Math.min(i * 0.03, 0.5)}s">
+                <td><span class="td-class">${escapeHtml(v.kto || '—')}</span></td>
+                <td><span class="mood-badge ${v.nastroj}">${moodLabel}</span></td>
+                <td>${reasonHtml}</td>
+                <td><span class="td-time">${dateStr}</span></td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ─── REASONS BAR CHART ────────────────────────────────────────────────────
+    function renderReasons() {
+        const container = document.getElementById('reasons-body');
+
+        const negative = rawVotes.filter(v => v.nastroj !== 'dobrze' && v.powod && v.powod !== 'null');
+
+        const counts = {};
+        negative.forEach(v => {
+            // Jeśli powód zawiera "| Opis:", weź tylko część przed nią
+            const reason = v.powod.split('|')[0].trim();
+            if (reason) counts[reason] = (counts[reason] || 0) + 1;
+        });
+
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+        if (sorted.length === 0) {
+            container.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;font-family:\'DM Mono\',monospace;">Brak danych o powodach</p>';
+            return;
+        }
+
+        const max = sorted[0][1];
+
+        container.innerHTML = sorted.map(([name, count]) => {
+            const width = Math.round((count / max) * 100);
+            return `<div class="reason-bar-item">
+                <div class="reason-bar-top">
+                    <span class="reason-bar-name">${escapeHtml(name)}</span>
+                    <span class="reason-bar-count">${count} głosów</span>
+                </div>
+                <div class="reason-bar-track">
+                    <div class="reason-bar-fill" style="width:${width}%"></div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ─── UTILS ────────────────────────────────────────────────────────────────
+    function pct(val, total) {
+        return total > 0 ? Math.round((val / total) * 100) : 0;
+    }
+
+    function formatDate(str) {
+        if (!str) return '—';
+        try {
+            const d = new Date(str);
+            if (isNaN(d)) return str;
+            return d.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                + ' ' + d.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+        } catch { return str; }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function animateCount(id, target) {
+        const el = document.getElementById(id);
+        const start = parseInt(el.innerText) || 0;
+        const duration = 600;
+        const startTime = performance.now();
+
+        function step(now) {
+            const progress = Math.min((now - startTime) / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3);
+            el.innerText = Math.round(start + (target - start) * ease);
+            if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    // ─── INIT ─────────────────────────────────────────────────────────────────
+    updateData();
+    setInterval(updateData, 30000); // Odśwież co 30 sekund
+</script>
 </body>
 </html>
