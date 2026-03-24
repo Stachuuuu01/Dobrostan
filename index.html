@@ -22,7 +22,6 @@
         input, textarea { width: 85%; padding: 15px; margin: 15px 0; border-radius: 10px; background: #2a2a2a; color: white; border: 1px solid #444; text-align: center; font-size: 1.1rem; outline: none; transition: 0.3s; font-family: inherit; }
         input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(220, 53, 69, 0.3); }
         footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-align: center; letter-spacing: 1px; }
-        
         .reason-stack { display: flex; flex-direction: column; gap: 10px; max-width: 500px; margin: 20px auto; }
         .btn-reason { text-align: left; padding: 15px 20px; background: #222; border: 1px solid #444; color: white; border-radius: 10px; cursor: pointer; transition: 0.3s; font-size: 1rem; }
         .btn-reason:hover { background: var(--primary); border-color: var(--primary); transform: translateX(10px); }
@@ -68,7 +67,7 @@
 
     <div id="step-login" class="hidden">
         <h2 id="login-title" style="margin-bottom:10px;">Logowanie Kodem</h2>
-        <div id="teacher-quote" class="quote-box hidden">„Dobrostan nauczyciela to dobrostan ucznia”</div>
+        <div id="teacher-quote" class="quote-box hidden">„Dobrostan nauczyciela to dobrostan ucznia"</div>
         <input type="password" id="user_code" placeholder="Wprowadź swój unikalny kod..." autocomplete="off">
         <button onclick="handleLogin()" class="btn-wybor" style="display:block; margin: 20px auto; width: 60%;">Zaloguj się</button>
         <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer;">Cofnij</button>
@@ -89,13 +88,13 @@
         <p style="color: #888; margin-bottom: 20px;">Wybierz główną przyczynę:</p>
         
         <div class="reason-stack">
-            <button class="btn-reason" onclick="sendVote('Zmiany hormonalne i dojrzewanie')">Zmiany hormonalne i dojrzewanie</button>
-            <button class="btn-reason" onclick="sendVote('Presja szkolna')">Presja szkolna</button>
-            <button class="btn-reason" onclick="sendVote('Media społecznościowe')">Media społecznościowe</button>
-            <button class="btn-reason" onclick="sendVote('Problemy rówieśnicze')">Problemy rówieśnicze</button>
-            <button class="btn-reason" onclick="sendVote('Trudności w domu')">Trudności w domu</button>
-            <button class="btn-reason" onclick="sendVote('Niedobór snu i styl życia')">Niedobór snu i styl życia</button>
-            <button class="btn-reason" onclick="sendVote('Problemy emocjonalne i zdrowotne')">Problemy emocjonalne i zdrowotne</button>
+            <button class="btn-reason" onclick="selectReason('Zmiany hormonalne i dojrzewanie')">Zmiany hormonalne i dojrzewanie</button>
+            <button class="btn-reason" onclick="selectReason('Presja szkolna')">Presja szkolna</button>
+            <button class="btn-reason" onclick="selectReason('Media społecznościowe')">Media społecznościowe</button>
+            <button class="btn-reason" onclick="selectReason('Problemy rówieśnicze')">Problemy rówieśnicze</button>
+            <button class="btn-reason" onclick="selectReason('Trudności w domu')">Trudności w domu</button>
+            <button class="btn-reason" onclick="selectReason('Niedobór snu i styl życia')">Niedobór snu i styl życia</button>
+            <button class="btn-reason" onclick="selectReason('Problemy emocjonalne i zdrowotne')">Problemy emocjonalne i zdrowotne</button>
         </div>
 
         <div id="extra-desc-box" class="hidden">
@@ -106,6 +105,8 @@
                 <textarea id="custom-reason-text" placeholder="Opisz krótko co się dzieje (opcjonalnie)..." rows="4"></textarea>
                 <button class="btn-wybor" style="display:block; margin: 10px auto; width: 60%;" onclick="sendVoteWithText()">Wyślij z opisem</button>
             </div>
+
+            <button class="btn-wybor" style="background: #555; font-size: 0.9rem; padding: 10px 20px; margin-top: 5px;" onclick="sendVote(selectedReason)">Wyślij bez opisu</button>
         </div>
 
         <button onclick="showStep('step-vote')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">← Wróć do nastroju</button>
@@ -128,9 +129,10 @@
 </footer>
 
 <script>
-    const CONFIG = {'1':['TE','TG','TI','TM','TP','TS' ,'BS','BK'],'2':['TE','TI','TP','TS','BK','BS'],'3':['TA','TE','TI','TM','TP','TS','BK','BS'],'4':['TE','TG','TI','TM','TP','TS','TT'],'5':['TE','TG','TI','TP','TS']};
+    const CONFIG = {'1':['TE','TG','TI','TM','TP','TS','BS','BK'],'2':['TE','TI','TP','TS','BK','BS'],'3':['TA','TE','TI','TM','TP','TS','BK','BS'],'4':['TE','TG','TI','TM','TP','TS','TT'],'5':['TE','TG','TI','TP','TS']};
     let currentTable = "";
     let selectedMood = "";
+    let selectedReason = "";
 
     function showStep(id) {
         document.querySelectorAll('#sekcja-glowna > div').forEach(div => div.classList.add('hidden'));
@@ -138,9 +140,12 @@
     }
 
     function selectYear(y) {
-        const cont = document.getElementById('list-profile'); cont.innerHTML = '';
+        const cont = document.getElementById('list-profile');
+        cont.innerHTML = '';
         CONFIG[y].forEach(p => {
-            let b = document.createElement('button'); b.className = 'btn-wybor'; b.innerText = p;
+            let b = document.createElement('button');
+            b.className = 'btn-wybor';
+            b.innerText = p;
             b.onclick = () => { if(['TG','TI','BS','BK','TT'].includes(p)) prepareLogin(y+p); else selectGroup(y+p); };
             cont.appendChild(b);
         });
@@ -148,11 +153,15 @@
     }
 
     function selectGroup(prefix) {
-        const cont = document.getElementById('list-grupy'); cont.innerHTML = '';
+        const cont = document.getElementById('list-grupy');
+        cont.innerHTML = '';
         const grp = prefix.includes('TM') ? ['_Automatyk','_Mechanik'] : ['G1','G2'];
         grp.forEach(g => {
-            let b = document.createElement('button'); b.className = 'btn-wybor'; b.innerText = g.replace('_','');
-            b.onclick = () => prepareLogin(prefix+g); cont.appendChild(b);
+            let b = document.createElement('button');
+            b.className = 'btn-wybor';
+            b.innerText = g.replace('_','');
+            b.onclick = () => prepareLogin(prefix+g);
+            cont.appendChild(b);
         });
         showStep('step-grupa');
     }
@@ -161,8 +170,13 @@
         currentTable = table;
         const quote = document.getElementById('teacher-quote');
         const title = document.getElementById('login-title');
-        if(table === 'Nauczyciele') { quote.classList.remove('hidden'); title.innerText = "Ankieta Nauczyciela"; }
-        else { quote.classList.add('hidden'); title.innerText = "Klasa " + table; }
+        if(table === 'Nauczyciele') {
+            quote.classList.remove('hidden');
+            title.innerText = "Ankieta Nauczyciela";
+        } else {
+            quote.classList.add('hidden');
+            title.innerText = "Klasa " + table;
+        }
         showStep('step-login');
     }
 
@@ -179,27 +193,51 @@
             document.getElementById('btn-admin').classList.add('hidden');
             document.getElementById('btn-logout').classList.remove('hidden');
             showStep('step-vote');
-        } else { alert('Błędny kod!'); }
+        } else {
+            alert('Błędny kod!');
+        }
     }
 
+    // ✅ POPRAWIONA FUNKCJA - teraz dla 'zle' i 'fatalnie' pokazuje wybór powodu
     function handleMoodSelection(mood) {
         selectedMood = mood;
-        const descBox = document.getElementById('extra-desc-box');
-        
-        // Resetujemy widoczność pola tekstowego przy każdym wyborze nastroju
+        selectedReason = "";
+
+        // Reset ekranu powodów
+        document.getElementById('extra-desc-box').classList.add('hidden');
         document.getElementById('textarea-container').classList.add('hidden');
         document.getElementById('btn-show-textarea').classList.remove('hidden');
         document.getElementById('custom-reason-text').value = "";
 
-        if (mood === 'zle') {
-            descBox.classList.remove('hidden'); // Pokaż opcję opisu tylko dla 'Źle'
-            showStep('step-reason');
-        } else if (mood === 'fatalnie') {
-            descBox.classList.add('hidden'); // Ukryj opcję opisu dla 'Fatalnie'
-            sendVote(null); // Głos wysyłany od razu (z alertem pomocy w sendVote)
+        if (mood === 'dobrze') {
+            // Dla 'dobrze' nie pytamy o powód - od razu wysyłamy
+            sendVote(null);
         } else {
-            sendVote(null); // Dla 'dobrze'
+            // Dla 'zle' i 'fatalnie' - pokazujemy ekran wyboru powodu
+            const header = document.getElementById('reason-header');
+            if (mood === 'fatalnie') {
+                header.style.color = 'var(--primary)';
+                header.innerText = 'Co sprawia, że czujesz się fatalnie?';
+            } else {
+                header.style.color = 'var(--warning)';
+                header.innerText = 'Co wpływa na Twój gorszy nastrój?';
+            }
+            showStep('step-reason');
         }
+    }
+
+    // ✅ NOWA FUNKCJA - wywoływana po kliknięciu powodu z listy
+    function selectReason(reason) {
+        selectedReason = reason;
+
+        // Podświetl wybrany przycisk
+        document.querySelectorAll('.btn-reason').forEach(btn => {
+            btn.style.background = btn.innerText === reason ? 'var(--primary)' : '#222';
+            btn.style.borderColor = btn.innerText === reason ? 'var(--primary)' : '#444';
+        });
+
+        // Pokaż opcję opisu
+        document.getElementById('extra-desc-box').classList.remove('hidden');
     }
 
     function showTextArea() {
@@ -209,11 +247,11 @@
 
     function sendVoteWithText() {
         const text = document.getElementById('custom-reason-text').value;
-        if(!text.trim()) {
-            alert("Proszę wpisz coś lub wybierz kategorię z listy powyżej.");
+        if (!text.trim()) {
+            alert("Proszę wpisz coś lub kliknij 'Wyślij bez opisu'.");
             return;
         }
-        sendVote("Opis własny: " + text);
+        sendVote(selectedReason + " | Opis: " + text);
     }
 
     async function sendVote(reason) {
@@ -224,18 +262,16 @@
                 body: JSON.stringify({ nastroj: selectedMood, tabela: currentTable, powod: reason })
             });
 
-            if(res.ok) { 
+            if (res.ok) {
                 if (selectedMood === 'fatalnie') {
                     const help = confirm('Dziękujemy za głos. Pamiętaj, że nie jesteś sam/a. Czy chcesz zobaczyć, gdzie szukać pomocy i wsparcia?');
                     if (help) {
                         window.open('https://twarzedepresji.pl/pomoc-dla-dzieci-i-mlodziezy/', '_blank');
                     }
                 } else {
-                    alert('Dziękujemy za głos!'); 
+                    alert('Dziękujemy za głos!');
                 }
-                setTimeout(() => {
-                    location.reload();
-                }, 300);
+                setTimeout(() => location.reload(), 300);
             } else {
                 alert('Błąd zapisu głosu.');
             }
