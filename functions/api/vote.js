@@ -1,16 +1,15 @@
 export async function onRequestPost(context) {
   try {
-    const { nastroj, tabela } = await context.request.json();
-    const db = context.env.baza; 
+    const { nastroj, tabela, powod } = await context.request.json();
+    const db = context.env.baza;
 
-    // Poprawione nazwy kolumn: kto, data_dodania
     await db.prepare(
-      "INSERT INTO Wyniki (nastroj, kto, data_dodania) VALUES (?, ?, ?)"
+      "INSERT INTO Wyniki (nastroj, kto, powod, data_dodania) VALUES (?, ?, ?, ?)"
     )
-    .bind(nastroj, tabela, new Date().toISOString())
+    .bind(nastroj, tabela, powod || null, new Date().toISOString())
     .run();
 
-    return new Response(JSON.stringify({ success: true }), { 
+    return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { "Content-Type": "application/json" }
     });
