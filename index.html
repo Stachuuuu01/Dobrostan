@@ -43,7 +43,6 @@
 
 <div id="sekcja-glowna" class="card">
 
-    <!-- KROK 1: Wybór rocznika -->
     <div id="step-rocznik">
         <h1 style="color: var(--primary); font-size: 2.5rem; margin-bottom: 30px;">Dobrostan</h1>
         <p style="color: #aaa; margin-bottom: 30px;">Wybierz swój rocznik, aby kontynuować</p>
@@ -55,22 +54,19 @@
             <button class="btn-wybor" onclick="selectYear('5')">Klasa 5</button>
         </div>
     </div>
-
-    <!-- KROK 2: Wybór profilu -->
+    
     <div id="step-profil" class="hidden">
         <h2 style="margin-bottom:20px;">Wybierz swój profil</h2>
         <div id="list-profile" class="grid-container"></div>
         <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px; font-size:1.1rem;">← Wróć do wyboru klasy</button>
     </div>
 
-    <!-- KROK 3: Wybór grupy -->
     <div id="step-grupa" class="hidden">
         <h2 style="margin-bottom:20px;">Wybierz grupę</h2>
         <div id="list-grupy" style="display:flex; justify-content:center; gap:20px;"></div>
         <button onclick="showStep('step-profil')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px;">← Wróć do profilu</button>
     </div>
 
-    <!-- KROK 4: Logowanie -->
     <div id="step-login" class="hidden">
         <h2 id="login-title" style="margin-bottom:10px;">Logowanie Kodem</h2>
         <div id="teacher-quote" class="quote-box hidden">„Dobrostan nauczyciela to dobrostan ucznia"</div>
@@ -79,7 +75,6 @@
         <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer;">Cofnij</button>
     </div>
 
-    <!-- KROK 5: Wybór nastroju -->
     <div id="step-vote" class="hidden">
         <h2 style="margin-bottom:10px;">Głosujesz jako: <span id="display-identity" style="color:var(--primary)"></span></h2>
         <p style="color: #888; margin-bottom: 40px;">Jak się dzisiaj czujesz w szkole?</p>
@@ -237,7 +232,6 @@
         selectedReason = "";
 
         if (mood === 'zle') {
-            // Dla "źle" → ekran z wyborem powodu z listy
             document.getElementById('extra-desc-box').classList.add('hidden');
             document.getElementById('textarea-container').classList.add('hidden');
             document.getElementById('btn-show-textarea').classList.remove('hidden');
@@ -250,7 +244,6 @@
             showStep('step-reason');
 
         } else {
-            // Dla "dobrze" i "fatalnie" → ekran z opcjonalnym opisem
             const header = document.getElementById('optional-desc-header');
             document.getElementById('optional-text').value = "";
             if (mood === 'dobrze') {
