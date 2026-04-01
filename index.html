@@ -33,7 +33,7 @@
 <div class="header">
     <img src="logo.png" class="logo-img" onclick="location.reload()">
     <div>
-        <button id="btn-visit" onclick="window.location.href='wizyta.html'" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Chcesz z kimś porozmawiać? Umów wizytę, lub sprawdź terminy.</button>
+        <button id="btn-visit" onclick="window.location.href='wizyta.html'" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Chcesz z kimś porozmawiać? Umów wizytę, lub sprawdź terminy. (Comming Soon)</button>
         <button id="btn-teacher" onclick="prepareLogin('Nauczyciele')" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Ankieta dla nauczyciela</button>
         <button id="btn-admin" onclick="document.getElementById('modal-admin').style.display='flex'" class="btn-wybor" style="margin-left:12px; padding: 10px 20px;">Admin</button>
         <button id="btn-logout" onclick="location.reload()" class="btn-wybor hidden" style="background:#444; padding: 10px 20px;">Wyloguj</button>
@@ -210,6 +210,9 @@
         document.getElementById('custom-reason-text').value = "";
 
         if (mood === 'dobrze') {
+            // Dla 'dobrze' nie pytamy o powód - od razu wysyłamy
+            sendVote(null);
+        if (mood === 'fatalnie') {
             // Dla 'dobrze' nie pytamy o powód - od razu wysyłamy
             sendVote(null);
         } else {
