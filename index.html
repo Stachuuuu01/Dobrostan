@@ -24,8 +24,9 @@
         footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-align: center; letter-spacing: 1px; }
         .reason-stack { display: flex; flex-direction: column; gap: 10px; max-width: 500px; margin: 20px auto; }
         .btn-reason { text-align: left; padding: 15px 20px; background: #222; border: 1px solid #444; color: white; border-radius: 10px; cursor: pointer; transition: 0.3s; font-size: 1rem; }
-        .btn-reason:hover { background: var(--primary); border-color: var(--primary); transform: translateX(10px); }
+        .btn-reason:hover { background: var(--warning); border-color: var(--warning); color: black; transform: translateX(10px); }
         #extra-desc-box { margin-top: 25px; padding-top: 20px; border-top: 1px solid #333; }
+        .optional-desc-box { margin-top: 25px; padding-top: 20px; border-top: 1px solid #333; }
     </style>
 </head>
 <body>
@@ -33,7 +34,7 @@
 <div class="header">
     <img src="logo.png" class="logo-img" onclick="location.reload()">
     <div>
-        <button id="btn-visit" onclick="window.location.href='wizyta.html'" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Chcesz z kimś porozmawiać? Umów wizytę, lub sprawdź terminy. (W krótce)</button>
+        <button id="btn-visit" onclick="window.location.href='wizyta.html'" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Chcesz z kimś porozmawiać? Umów wizytę, lub sprawdź terminy. (Wkrótce)</button>
         <button id="btn-teacher" onclick="prepareLogin('Nauczyciele')" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Ankieta dla nauczyciela</button>
         <button id="btn-admin" onclick="document.getElementById('modal-admin').style.display='flex'" class="btn-wybor" style="margin-left:12px; padding: 10px 20px;">Admin</button>
         <button id="btn-logout" onclick="location.reload()" class="btn-wybor hidden" style="background:#444; padding: 10px 20px;">Wyloguj</button>
@@ -41,6 +42,8 @@
 </div>
 
 <div id="sekcja-glowna" class="card">
+
+    <!-- KROK 1: Wybór rocznika -->
     <div id="step-rocznik">
         <h1 style="color: var(--primary); font-size: 2.5rem; margin-bottom: 30px;">Dobrostan</h1>
         <p style="color: #aaa; margin-bottom: 30px;">Wybierz swój rocznik, aby kontynuować</p>
@@ -53,18 +56,21 @@
         </div>
     </div>
 
+    <!-- KROK 2: Wybór profilu -->
     <div id="step-profil" class="hidden">
         <h2 style="margin-bottom:20px;">Wybierz swój profil</h2>
         <div id="list-profile" class="grid-container"></div>
         <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px; font-size:1.1rem;">← Wróć do wyboru klasy</button>
     </div>
 
+    <!-- KROK 3: Wybór grupy -->
     <div id="step-grupa" class="hidden">
         <h2 style="margin-bottom:20px;">Wybierz grupę</h2>
         <div id="list-grupy" style="display:flex; justify-content:center; gap:20px;"></div>
         <button onclick="showStep('step-profil')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px;">← Wróć do profilu</button>
     </div>
 
+    <!-- KROK 4: Logowanie -->
     <div id="step-login" class="hidden">
         <h2 id="login-title" style="margin-bottom:10px;">Logowanie Kodem</h2>
         <div id="teacher-quote" class="quote-box hidden">„Dobrostan nauczyciela to dobrostan ucznia"</div>
@@ -73,6 +79,7 @@
         <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer;">Cofnij</button>
     </div>
 
+    <!-- KROK 5: Wybór nastroju -->
     <div id="step-vote" class="hidden">
         <h2 style="margin-bottom:10px;">Głosujesz jako: <span id="display-identity" style="color:var(--primary)"></span></h2>
         <p style="color: #888; margin-bottom: 40px;">Jak się dzisiaj czujesz w szkole?</p>
@@ -83,8 +90,9 @@
         </div>
     </div>
 
+    <!-- KROK 6a: Wybór powodu (tylko dla "źle") -->
     <div id="step-reason" class="hidden">
-        <h2 id="reason-header" style="margin-bottom:10px; color:var(--warning);">Co wpływa na Twój gorszy nastrój?</h2>
+        <h2 style="margin-bottom:10px; color:var(--warning);">Co wpływa na Twój gorszy nastrój?</h2>
         <p style="color: #888; margin-bottom: 20px;">Wybierz główną przyczynę:</p>
         
         <div class="reason-stack">
@@ -97,22 +105,38 @@
             <button class="btn-reason" onclick="selectReason('Problemy emocjonalne i zdrowotne')">Problemy emocjonalne i zdrowotne</button>
         </div>
 
+        <!-- Pojawia się po wybraniu powodu z listy -->
         <div id="extra-desc-box" class="hidden">
             <p style="color: #ccc; margin-bottom: 10px;">Czy chcesz rozwinąć swój problem?</p>
-            <button id="btn-show-textarea" class="btn-wybor" style="background: #444; font-size: 0.9rem; padding: 10px 20px;" onclick="showTextArea()">Tak, chcę opisać</button>
-            
+            <button id="btn-show-textarea" class="btn-wybor" style="background: #444; font-size: 0.9rem; padding: 10px 20px;" onclick="showTextArea('textarea-container', 'btn-show-textarea')">Tak, chcę opisać</button>
             <div id="textarea-container" class="hidden">
-                <textarea id="custom-reason-text" placeholder="Opisz krótko co się dzieje (opcjonalnie)..." rows="4"></textarea>
-                <button class="btn-wybor" style="display:block; margin: 10px auto; width: 60%;" onclick="sendVoteWithText()">Wyślij z opisem</button>
+                <textarea id="reason-text" placeholder="Opisz krótko co się dzieje (opcjonalnie)..." rows="4"></textarea>
+                <button class="btn-wybor" style="display:block; margin: 10px auto; width: 60%;" onclick="sendVoteWithText('reason-text')">Wyślij z opisem</button>
             </div>
-
             <button class="btn-wybor" style="background: #555; font-size: 0.9rem; padding: 10px 20px; margin-top: 5px;" onclick="sendVote(selectedReason)">Wyślij bez opisu</button>
         </div>
 
         <button onclick="showStep('step-vote')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">← Wróć do nastroju</button>
     </div>
+
+    <!-- KROK 6b: Opcjonalny opis (dla "dobrze" i "fatalnie") -->
+    <div id="step-optional-desc" class="hidden">
+        <h2 id="optional-desc-header" style="margin-bottom:10px;"></h2>
+        <p style="color: #888; margin-bottom: 20px;">Możesz opisać swoje samopoczucie, jeśli chcesz.</p>
+
+        <textarea id="optional-text" placeholder="Opisz krótko jak się czujesz (opcjonalnie)..." rows="4"></textarea>
+
+        <div style="margin-top: 20px; display:flex; justify-content:center; gap:15px; flex-wrap:wrap;">
+            <button class="btn-wybor" onclick="sendVoteWithOptionalText()">Wyślij z opisem</button>
+            <button class="btn-wybor" style="background: #555;" onclick="sendVote(null)">Wyślij bez opisu</button>
+        </div>
+
+        <button onclick="showStep('step-vote')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">← Wróć do nastroju</button>
+    </div>
+
 </div>
 
+<!-- Modal admina -->
 <div id="modal-admin" class="modal">
     <div class="card" style="max-width:380px;">
         <h2 style="margin-bottom:20px;">Panel Administratora</h2>
@@ -129,7 +153,14 @@
 </footer>
 
 <script>
-    const CONFIG = {'1':['TE','TG','TI','TM','TP','TS','BS','BK'],'2':['TE','TI','TP','TS','BK','BS'],'3':['TA','TE','TI','TM','TP','TS','BK','BS'],'4':['TE','TG','TI','TM','TP','TS','TT'],'5':['TE','TG','TI','TP','TS']};
+    const CONFIG = {
+        '1':['TE','TG','TI','TM','TP','TS','BS','BK'],
+        '2':['TE','TI','TP','TS','BK','BS'],
+        '3':['TA','TE','TI','TM','TP','TS','BK','BS'],
+        '4':['TE','TG','TI','TM','TP','TS','TT'],
+        '5':['TE','TG','TI','TP','TS']
+    };
+
     let currentTable = "";
     let selectedMood = "";
     let selectedReason = "";
@@ -146,7 +177,10 @@
             let b = document.createElement('button');
             b.className = 'btn-wybor';
             b.innerText = p;
-            b.onclick = () => { if(['TG','TI','BS','BK','TT'].includes(p)) prepareLogin(y+p); else selectGroup(y+p); };
+            b.onclick = () => {
+                if (['TG','TI','BS','BK','TT'].includes(p)) prepareLogin(y + p);
+                else selectGroup(y + p);
+            };
             cont.appendChild(b);
         });
         showStep('step-profil');
@@ -160,7 +194,7 @@
             let b = document.createElement('button');
             b.className = 'btn-wybor';
             b.innerText = g.replace('_','');
-            b.onclick = () => prepareLogin(prefix+g);
+            b.onclick = () => prepareLogin(prefix + g);
             cont.appendChild(b);
         });
         showStep('step-grupa');
@@ -170,7 +204,7 @@
         currentTable = table;
         const quote = document.getElementById('teacher-quote');
         const title = document.getElementById('login-title');
-        if(table === 'Nauczyciele') {
+        if (table === 'Nauczyciele') {
             quote.classList.remove('hidden');
             title.innerText = "Ankieta Nauczyciela";
         } else {
@@ -187,7 +221,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ tabela: currentTable, kod: kod })
         });
-        if(res.ok) {
+        if (res.ok) {
             document.getElementById('display-identity').innerText = currentTable;
             document.getElementById('btn-teacher').classList.add('hidden');
             document.getElementById('btn-admin').classList.add('hidden');
@@ -198,60 +232,70 @@
         }
     }
 
-    // ✅ POPRAWIONA FUNKCJA - teraz dla 'zle' i 'fatalnie' pokazuje wybór powodu
     function handleMoodSelection(mood) {
         selectedMood = mood;
         selectedReason = "";
 
-        // Reset ekranu powodów
-        document.getElementById('extra-desc-box').classList.add('hidden');
-        document.getElementById('textarea-container').classList.add('hidden');
-        document.getElementById('btn-show-textarea').classList.remove('hidden');
-        document.getElementById('custom-reason-text').value = "";
-
-        if (mood === 'dobrze') {
-            sendVote(null);
-            
-        if (mood === 'fatalnie') 
-            sendVote(null);
-            
-        } else {
-            // Dla 'zle' i 'fatalnie' - pokazujemy ekran wyboru powodu
-            const header = document.getElementById('reason-header');
-            if (mood === 'zle') {
-                header.style.color = 'var(--primary)';
-                header.innerText = 'Co wpływa na twój gorszy nastruj??';
-            } 
+        if (mood === 'zle') {
+            // Dla "źle" → ekran z wyborem powodu z listy
+            document.getElementById('extra-desc-box').classList.add('hidden');
+            document.getElementById('textarea-container').classList.add('hidden');
+            document.getElementById('btn-show-textarea').classList.remove('hidden');
+            document.getElementById('reason-text').value = "";
+            document.querySelectorAll('.btn-reason').forEach(btn => {
+                btn.style.background = '#222';
+                btn.style.borderColor = '#444';
+                btn.style.color = 'white';
+            });
             showStep('step-reason');
+
+        } else {
+            // Dla "dobrze" i "fatalnie" → ekran z opcjonalnym opisem
+            const header = document.getElementById('optional-desc-header');
+            document.getElementById('optional-text').value = "";
+            if (mood === 'dobrze') {
+                header.style.color = 'var(--success)';
+                header.innerText = 'Cieszę się, że czujesz się dobrze! 😊';
+            } else {
+                header.style.color = 'var(--primary)';
+                header.innerText = 'Przykro nam, że czujesz się fatalnie 😖';
+            }
+            showStep('step-optional-desc');
         }
     }
 
-    // ✅ NOWA FUNKCJA - wywoływana po kliknięciu powodu z listy
     function selectReason(reason) {
         selectedReason = reason;
-
-        // Podświetl wybrany przycisk
         document.querySelectorAll('.btn-reason').forEach(btn => {
-            btn.style.background = btn.innerText === reason ? 'var(--primary)' : '#222';
-            btn.style.borderColor = btn.innerText === reason ? 'var(--primary)' : '#444';
+            const isSelected = btn.innerText === reason;
+            btn.style.background = isSelected ? 'var(--warning)' : '#222';
+            btn.style.borderColor = isSelected ? 'var(--warning)' : '#444';
+            btn.style.color = isSelected ? 'black' : 'white';
         });
-
-        // Pokaż opcję opisu
         document.getElementById('extra-desc-box').classList.remove('hidden');
     }
 
-    function showTextArea() {
-        document.getElementById('textarea-container').classList.remove('hidden');
-        document.getElementById('btn-show-textarea').classList.add('hidden');
+    function showTextArea(containerId, btnId) {
+        document.getElementById(containerId).classList.remove('hidden');
+        document.getElementById(btnId).classList.add('hidden');
     }
 
-    function sendVoteWithText() {
-        const text = document.getElementById('custom-reason-text').value;
+    function sendVoteWithText(textareaId) {
+        const text = document.getElementById(textareaId).value;
         if (!text.trim()) {
             alert("Proszę wpisz coś lub kliknij 'Wyślij bez opisu'.");
             return;
         }
         sendVote(selectedReason + " | Opis: " + text);
+    }
+
+    function sendVoteWithOptionalText() {
+        const text = document.getElementById('optional-text').value;
+        if (!text.trim()) {
+            alert("Proszę wpisz coś lub kliknij 'Wyślij bez opisu'.");
+            return;
+        }
+        sendVote("Opis: " + text);
     }
 
     async function sendVote(reason) {
