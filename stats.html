@@ -544,9 +544,10 @@ function renderTable() {
       : '';
 
     // Action button - show for fatal or high streak
-    const actionBtn = (isFatal || streak >= 2)
-      ? `<button class="btn-send-msg" onclick="openMsgModal(${JSON.stringify(escapeHtml(v.kto||'?'))}, ${JSON.stringify(v.kod||'')})">✉ Wyślij</button>`
-      : `<span style="color:#333;font-size:0.75rem;font-family:'DM Mono',monospace;">—</span>`;
+        // Zmień tę linię w funkcji renderTable():
+const actionBtn = (isFatal || streak >= 2)
+  ? `<button class="btn-send-msg" onclick='openMsgModal(${JSON.stringify(v.kto || "?")}, ${JSON.stringify(v.kod || "")})'>✉ Wyślij</button>`
+  : `<span style="color:#333;font-size:0.75rem;font-family:'DM Mono',monospace;">—</span>`;
 
     return `<tr style="animation:rowIn 0.2s ${Math.min(i*0.025,0.4)}s ease both">
       <td><span class="td-class">${escapeHtml(v.kto||'—')}</span>${streakBadge}</td>
