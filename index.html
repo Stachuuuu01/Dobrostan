@@ -1,341 +1,397 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Dobrostan - ZSTiO Jarosław</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root { --primary: #dc3545; --bg: #000; --card-bg: #1a1a1a; --text: #fff; --teacher: #6f42c1; --success: #28a745; --warning: #ffc107; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; margin: 0; min-height: 100vh; overflow-x: hidden; }
-        .header { background: #111; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); box-sizing: border-box; box-shadow: 0 5px 15px rgba(220, 53, 69, 0.2); }
-        .logo-img { height: 60px; cursor: pointer; transition: transform 0.3s; }
-        .logo-img:hover { transform: scale(1.05); }
-        .card { background: var(--card-bg); padding: 40px; border-radius: 25px; width: 95%; max-width: 900px; text-align: center; margin-top: 30px; border: 1px solid #333; box-shadow: 0 15px 40px rgba(0,0,0,0.7); position: relative; }
-        .btn-wybor { padding: 18px 28px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 6px 12px rgba(0,0,0,0.4); margin: 5px; }
-        .btn-wybor:hover { transform: translateY(-8px); filter: brightness(1.2); box-shadow: 0 12px 25px rgba(220, 53, 69, 0.4); }
-        .quote-box { font-weight: bold; font-size: 1.6rem; margin: 25px 0; background: linear-gradient(270deg, #ff7e5f, #feb47b, #86e3ce, #d0e6a5, #ffdd94, #ff7e5f); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientMove 8s ease infinite; text-shadow: 0 2px 10px rgba(255,255,255,0.1); }
-        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 30px; }
-        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); display:none; justify-content:center; align-items:center; z-index:999; backdrop-filter: blur(5px); }
-        .hidden { display: none; }
-        input, textarea { width: 85%; padding: 15px; margin: 15px 0; border-radius: 10px; background: #2a2a2a; color: white; border: 1px solid #444; text-align: center; font-size: 1.1rem; outline: none; transition: 0.3s; font-family: inherit; }
-        input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(220, 53, 69, 0.3); }
-        footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-align: center; letter-spacing: 1px; }
-        .reason-stack { display: flex; flex-direction: column; gap: 10px; max-width: 500px; margin: 20px auto; }
-        .btn-reason { text-align: left; padding: 15px 20px; background: #222; border: 1px solid #444; color: white; border-radius: 10px; cursor: pointer; transition: 0.3s; font-size: 1rem; }
-        .btn-reason:hover { background: var(--warning); border-color: var(--warning); color: black; transform: translateX(10px); }
-        #extra-desc-box { margin-top: 25px; padding-top: 20px; border-top: 1px solid #333; }
-        .optional-desc-box { margin-top: 25px; padding-top: 20px; border-top: 1px solid #333; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dobrostan - ZSTiO Jarosław</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root { --primary: #dc3545; --bg: #000; --card-bg: #1a1a1a; --text: #fff; --teacher: #6f42c1; --success: #28a745; --warning: #ffc107; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; margin: 0; min-height: 100vh; overflow-x: hidden; }
+.header { background: #111; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); box-sizing: border-box; box-shadow: 0 5px 15px rgba(220, 53, 69, 0.2); }
+.logo-img { height: 60px; cursor: pointer; transition: transform 0.3s; }
+.logo-img:hover { transform: scale(1.05); }
+.card { background: var(--card-bg); padding: 40px; border-radius: 25px; width: 95%; max-width: 900px; text-align: center; margin-top: 30px; border: 1px solid #333; box-shadow: 0 15px 40px rgba(0,0,0,0.7); position: relative; }
+.btn-wybor { padding: 18px 28px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 6px 12px rgba(0,0,0,0.4); margin: 5px; }
+.btn-wybor:hover { transform: translateY(-8px); filter: brightness(1.2); box-shadow: 0 12px 25px rgba(220, 53, 69, 0.4); }
+.quote-box { font-weight: bold; font-size: 1.6rem; margin: 25px 0; background: linear-gradient(270deg, #ff7e5f, #feb47b, #86e3ce, #d0e6a5, #ffdd94, #ff7e5f); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientMove 8s ease infinite; text-shadow: 0 2px 10px rgba(255,255,255,0.1); }
+@keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+.grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 30px; }
+.modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); display:none; justify-content:center; align-items:center; z-index:999; backdrop-filter: blur(5px); }
+.hidden { display: none; }
+input, textarea { width: 85%; padding: 15px; margin: 15px 0; border-radius: 10px; background: #2a2a2a; color: white; border: 1px solid #444; text-align: center; font-size: 1.1rem; outline: none; transition: 0.3s; font-family: inherit; }
+input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(220, 53, 69, 0.3); }
+footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-align: center; letter-spacing: 1px; }
+.reason-stack { display: flex; flex-direction: column; gap: 10px; max-width: 500px; margin: 20px auto; }
+.btn-reason { text-align: left; padding: 15px 20px; background: #222; border: 1px solid #444; color: white; border-radius: 10px; cursor: pointer; transition: 0.3s; font-size: 1rem; }
+.btn-reason:hover { background: var(--primary); border-color: var(--primary); transform: translateX(10px); }
+#extra-desc-box { margin-top: 25px; padding-top: 20px; border-top: 1px solid #333; }
+
+/* Inbox button */
+.btn-inbox {
+  position: relative;
+  padding: 10px 20px;
+  background: #1a1a2e;
+  color: #a0a8ff;
+  border: 1px solid #3a3a6a;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 5px;
+}
+.btn-inbox:hover { background: #22224a; border-color: #6060cc; color: #c0c8ff; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(80,80,200,0.3); }
+.inbox-icon { font-size: 1.2rem; }
+
+/* Inbox modal styles */
+.inbox-modal-inner {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 20px;
+  padding: 36px 32px;
+  width: 95%;
+  max-width: 460px;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+}
+.inbox-modal-inner h2 { margin-bottom: 6px; color: #a0a8ff; }
+.inbox-modal-inner p { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
+.inbox-code-area { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
+.inbox-code-area input { width: 200px; margin: 0; text-align: center; }
+.btn-inbox-login { padding: 13px 22px; background: #3333aa; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: 0.3s; white-space: nowrap; }
+.btn-inbox-login:hover { background: #4444cc; }
+#inbox-messages-area { margin-top: 24px; text-align: left; }
+#inbox-messages-area h3 { color: #a0a8ff; margin-bottom: 14px; font-size: 1rem; border-bottom: 1px solid #222; padding-bottom: 8px; }
+.inbox-msg {
+  background: #1c1c2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.inbox-msg.unread { border-left: 3px solid #6060ff; }
+.inbox-msg-from { font-size: 0.75rem; color: #666; margin-bottom: 6px; font-family: monospace; }
+.inbox-msg-text { font-size: 0.95rem; color: #ddd; line-height: 1.5; }
+.inbox-msg-time { font-size: 0.72rem; color: #444; margin-top: 8px; text-align: right; }
+.inbox-empty { text-align: center; color: #444; padding: 30px 0; font-size: 0.9rem; }
+.inbox-empty-icon { font-size: 2rem; margin-bottom: 10px; }
+.btn-close-modal { position: absolute; top: 16px; right: 20px; background: none; border: none; color: #555; font-size: 1.4rem; cursor: pointer; transition: color 0.2s; }
+.btn-close-modal:hover { color: #fff; }
+</style>
 </head>
 <body>
-
 <div class="header">
-    <img src="logo.png" class="logo-img" onclick="location.reload()">
-    <div>
-        <button id="btn-visit" onclick="window.location.href='wizyta.html'" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Chcesz z kimś porozmawiać? Umów wizytę, lub sprawdź terminy. (Wkrótce)</button>
-        <button id="btn-teacher" onclick="prepareLogin('Nauczyciele')" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Ankieta dla nauczyciela</button>
-        <button id="btn-admin" onclick="document.getElementById('modal-admin').style.display='flex'" class="btn-wybor" style="margin-left:12px; padding: 10px 20px;">Admin</button>
-        <button id="btn-logout" onclick="location.reload()" class="btn-wybor hidden" style="background:#444; padding: 10px 20px;">Wyloguj</button>
-    </div>
+  <img src="logo.png" class="logo-img" onclick="location.reload()">
+  <div>
+    <button id="btn-visit" onclick="window.location.href='wizyta.html'" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Chcesz z kimś porozmawiać? Umów wizytę, lub sprawdź terminy.</button>
+    <button id="btn-teacher" onclick="prepareLogin('Nauczyciele')" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Ankieta dla nauczyciela</button>
+    <!-- INBOX BUTTON -->
+    <button class="btn-inbox" onclick="document.getElementById('modal-inbox').style.display='flex'" title="Sprawdź wiadomości">
+      <span class="inbox-icon">📬</span> Wiadomości
+    </button>
+    <button id="btn-admin" onclick="document.getElementById('modal-admin').style.display='flex'" class="btn-wybor" style="margin-left:12px; padding: 10px 20px;">Admin</button>
+    <button id="btn-logout" onclick="location.reload()" class="btn-wybor hidden" style="background:#444; padding: 10px 20px;">Wyloguj</button>
+  </div>
 </div>
 
 <div id="sekcja-glowna" class="card">
-
-    <div id="step-rocznik">
-        <h1 style="color: var(--primary); font-size: 2.5rem; margin-bottom: 30px;">Dobrostan</h1>
-        <p style="color: #aaa; margin-bottom: 30px;">Wybierz swój rocznik, aby kontynuować</p>
-        <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap;">
-            <button class="btn-wybor" onclick="selectYear('1')">Klasa 1</button>
-            <button class="btn-wybor" onclick="selectYear('2')">Klasa 2</button>
-            <button class="btn-wybor" onclick="selectYear('3')">Klasa 3</button>
-            <button class="btn-wybor" onclick="selectYear('4')">Klasa 4</button>
-            <button class="btn-wybor" onclick="selectYear('5')">Klasa 5</button>
-        </div>
+  <div id="step-rocznik">
+    <h1 style="color: var(--primary); font-size: 2.5rem; margin-bottom: 30px;">Dobrostan</h1>
+    <p style="color: #aaa; margin-bottom: 30px;">Wybierz swój rocznik, aby kontynuować</p>
+    <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap;">
+      <button class="btn-wybor" onclick="selectYear('1')">Klasa 1</button>
+      <button class="btn-wybor" onclick="selectYear('2')">Klasa 2</button>
+      <button class="btn-wybor" onclick="selectYear('3')">Klasa 3</button>
+      <button class="btn-wybor" onclick="selectYear('4')">Klasa 4</button>
+      <button class="btn-wybor" onclick="selectYear('5')">Klasa 5</button>
     </div>
-    
-    <div id="step-profil" class="hidden">
-        <h2 style="margin-bottom:20px;">Wybierz swój profil</h2>
-        <div id="list-profile" class="grid-container"></div>
-        <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px; font-size:1.1rem;">← Wróć do wyboru klasy</button>
+  </div>
+
+  <div id="step-profil" class="hidden">
+    <h2 style="margin-bottom:20px;">Wybierz swój profil</h2>
+    <div id="list-profile" class="grid-container"></div>
+    <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px; font-size:1.1rem;">← Wróć do wyboru klasy</button>
+  </div>
+
+  <div id="step-grupa" class="hidden">
+    <h2 style="margin-bottom:20px;">Wybierz grupę</h2>
+    <div id="list-grupy" style="display:flex; justify-content:center; gap:20px;"></div>
+    <button onclick="showStep('step-profil')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px;">← Wróć do profilu</button>
+  </div>
+
+  <div id="step-login" class="hidden">
+    <h2 id="login-title" style="margin-bottom:10px;">Logowanie Kodem</h2>
+    <div id="teacher-quote" class="quote-box hidden">„Dobrostan nauczyciela to dobrostan ucznia"</div>
+    <input type="password" id="user_code" placeholder="Wprowadź swój unikalny kod..." autocomplete="off">
+    <button onclick="handleLogin()" class="btn-wybor" style="display:block; margin: 20px auto; width: 60%;">Zaloguj się</button>
+    <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer;">Cofnij</button>
+  </div>
+
+  <div id="step-vote" class="hidden">
+    <h2 style="margin-bottom:10px;">Głosujesz jako: <span id="display-identity" style="color:var(--primary)"></span></h2>
+    <p style="color: #888; margin-bottom: 40px;">Jak się dzisiaj czujesz w szkole?</p>
+    <div style="display:flex; justify-content:center; gap:25px; margin-top:10px; flex-wrap:wrap;">
+      <button onclick="handleMoodSelection('dobrze')" class="btn-wybor" style="background:var(--success); height:150px; width:180px; font-size:1.4rem;">Dobrze 😊</button>
+      <button onclick="handleMoodSelection('zle')" class="btn-wybor" style="background:var(--warning); color:black; height:150px; width:180px; font-size:1.4rem;">Źle 😐</button>
+      <button onclick="handleMoodSelection('fatalnie')" class="btn-wybor" style="background:var(--primary); height:150px; width:180px; font-size:1.4rem;">Fatalnie 😖</button>
     </div>
+  </div>
 
-    <div id="step-grupa" class="hidden">
-        <h2 style="margin-bottom:20px;">Wybierz grupę</h2>
-        <div id="list-grupy" style="display:flex; justify-content:center; gap:20px;"></div>
-        <button onclick="showStep('step-profil')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:30px;">← Wróć do profilu</button>
+  <div id="step-reason" class="hidden">
+    <h2 id="reason-header" style="margin-bottom:10px; color:var(--warning);">Co wpływa na Twój gorszy nastrój?</h2>
+    <p style="color: #888; margin-bottom: 20px;">Wybierz główną przyczynę:</p>
+    <div class="reason-stack">
+      <button class="btn-reason" onclick="sendVote('Zmiany hormonalne i dojrzewanie')">Zmiany hormonalne i dojrzewanie</button>
+      <button class="btn-reason" onclick="sendVote('Presja szkolna')">Presja szkolna</button>
+      <button class="btn-reason" onclick="sendVote('Media społecznościowe')">Media społecznościowe</button>
+      <button class="btn-reason" onclick="sendVote('Problemy rówieśnicze')">Problemy rówieśnicze</button>
+      <button class="btn-reason" onclick="sendVote('Trudności w domu')">Trudności w domu</button>
+      <button class="btn-reason" onclick="sendVote('Niedobór snu i styl życia')">Niedobór snu i styl życia</button>
+      <button class="btn-reason" onclick="sendVote('Problemy emocjonalne i zdrowotne')">Problemy emocjonalne i zdrowotne</button>
     </div>
-
-    <div id="step-login" class="hidden">
-        <h2 id="login-title" style="margin-bottom:10px;">Logowanie Kodem</h2>
-        <div id="teacher-quote" class="quote-box hidden">„Dobrostan nauczyciela to dobrostan ucznia"</div>
-        <input type="password" id="user_code" placeholder="Wprowadź swój unikalny kod..." autocomplete="off">
-        <button onclick="handleLogin()" class="btn-wybor" style="display:block; margin: 20px auto; width: 60%;">Zaloguj się</button>
-        <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer;">Cofnij</button>
+    <div id="extra-desc-box" class="hidden">
+      <p style="color: #ccc; margin-bottom: 10px;">Czy chcesz rozwinąć swój problem?</p>
+      <button id="btn-show-textarea" class="btn-wybor" style="background: #444; font-size: 0.9rem; padding: 10px 20px;" onclick="showTextArea()">Tak, chcę opisać</button>
+      <div id="textarea-container" class="hidden">
+        <textarea id="custom-reason-text" placeholder="Opisz krótko co się dzieje (opcjonalnie)..." rows="4"></textarea>
+        <button class="btn-wybor" style="display:block; margin: 10px auto; width: 60%;" onclick="sendVoteWithText()">Wyślij z opisem</button>
+      </div>
     </div>
-
-    <div id="step-vote" class="hidden">
-        <h2 style="margin-bottom:10px;">Głosujesz jako: <span id="display-identity" style="color:var(--primary)"></span></h2>
-        <p style="color: #888; margin-bottom: 40px;">Jak się dzisiaj czujesz w szkole?</p>
-        <div style="display:flex; justify-content:center; gap:25px; margin-top:10px; flex-wrap:wrap;">
-            <button onclick="handleMoodSelection('dobrze')" class="btn-wybor" style="background:var(--success); height:150px; width:180px; font-size:1.4rem;">Dobrze 😊</button>
-            <button onclick="handleMoodSelection('zle')" class="btn-wybor" style="background:var(--warning); color:black; height:150px; width:180px; font-size:1.4rem;">Źle 😐</button>
-            <button onclick="handleMoodSelection('fatalnie')" class="btn-wybor" style="background:var(--primary); height:150px; width:180px; font-size:1.4rem;">Fatalnie 😖</button>
-        </div>
-    </div>
-
-    <!-- KROK 6a: Wybór powodu (tylko dla "źle") -->
-    <div id="step-reason" class="hidden">
-        <h2 style="margin-bottom:10px; color:var(--warning);">Co wpływa na Twój gorszy nastrój?</h2>
-        <p style="color: #888; margin-bottom: 20px;">Wybierz główną przyczynę:</p>
-        
-        <div class="reason-stack">
-            <button class="btn-reason" onclick="selectReason('Zmiany hormonalne i dojrzewanie')">Zmiany hormonalne i dojrzewanie</button>
-            <button class="btn-reason" onclick="selectReason('Presja szkolna')">Presja szkolna</button>
-            <button class="btn-reason" onclick="selectReason('Media społecznościowe')">Media społecznościowe</button>
-            <button class="btn-reason" onclick="selectReason('Problemy rówieśnicze')">Problemy rówieśnicze</button>
-            <button class="btn-reason" onclick="selectReason('Trudności w domu')">Trudności w domu</button>
-            <button class="btn-reason" onclick="selectReason('Niedobór snu i styl życia')">Niedobór snu i styl życia</button>
-            <button class="btn-reason" onclick="selectReason('Problemy emocjonalne i zdrowotne')">Problemy emocjonalne i zdrowotne</button>
-        </div>
-
-        <!-- Pojawia się po wybraniu powodu z listy -->
-        <div id="extra-desc-box" class="hidden">
-            <p style="color: #ccc; margin-bottom: 10px;">Czy chcesz rozwinąć swój problem?</p>
-            <button id="btn-show-textarea" class="btn-wybor" style="background: #444; font-size: 0.9rem; padding: 10px 20px;" onclick="showTextArea('textarea-container', 'btn-show-textarea')">Tak, chcę opisać</button>
-            <div id="textarea-container" class="hidden">
-                <textarea id="reason-text" placeholder="Opisz krótko co się dzieje (opcjonalnie)..." rows="4"></textarea>
-                <button class="btn-wybor" style="display:block; margin: 10px auto; width: 60%;" onclick="sendVoteWithText('reason-text')">Wyślij z opisem</button>
-            </div>
-            <button class="btn-wybor" style="background: #555; font-size: 0.9rem; padding: 10px 20px; margin-top: 5px;" onclick="sendVote(selectedReason)">Wyślij bez opisu</button>
-        </div>
-
-        <button onclick="showStep('step-vote')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">← Wróć do nastroju</button>
-    </div>
-
-    <!-- KROK 6b: Opcjonalny opis (dla "dobrze" i "fatalnie") -->
-    <div id="step-optional-desc" class="hidden">
-        <h2 id="optional-desc-header" style="margin-bottom:10px;"></h2>
-        <p style="color: #888; margin-bottom: 20px;">Możesz opisać swoje samopoczucie, jeśli chcesz.</p>
-
-        <textarea id="optional-text" placeholder="Opisz krótko jak się czujesz (opcjonalnie)..." rows="4"></textarea>
-
-        <div style="margin-top: 20px; display:flex; justify-content:center; gap:15px; flex-wrap:wrap;">
-            <button class="btn-wybor" onclick="sendVoteWithOptionalText()">Wyślij z opisem</button>
-            <button class="btn-wybor" style="background: #555;" onclick="sendVote(null)">Wyślij bez opisu</button>
-        </div>
-
-        <button onclick="showStep('step-vote')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">← Wróć do nastroju</button>
-    </div>
-
+    <button onclick="showStep('step-vote')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">← Wróć do nastroju</button>
+  </div>
 </div>
 
-<!-- Modal admina -->
+<!-- ADMIN MODAL -->
 <div id="modal-admin" class="modal">
-    <div class="card" style="max-width:380px;">
-        <h2 style="margin-bottom:20px;">Panel Administratora</h2>
-        <input type="text" id="admin_user" placeholder="Login">
-        <input type="password" id="admin_pass" placeholder="Hasło">
-        <button onclick="handleAdminLogin()" class="btn-wybor" style="width:100%; margin-top:15px;">Zaloguj</button>
-        <button onclick="document.getElementById('modal-admin').style.display='none'" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">Anuluj</button>
+  <div class="card" style="max-width:380px;">
+    <h2 style="margin-bottom:20px;">Panel Administratora</h2>
+    <input type="text" id="admin_user" placeholder="Login">
+    <input type="password" id="admin_pass" placeholder="Hasło">
+    <button onclick="handleAdminLogin()" class="btn-wybor" style="width:100%; margin-top:15px;">Zaloguj</button>
+    <button onclick="document.getElementById('modal-admin').style.display='none'" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">Anuluj</button>
+  </div>
+</div>
+
+<!-- INBOX MODAL -->
+<div id="modal-inbox" class="modal">
+  <div class="inbox-modal-inner">
+    <button class="btn-close-modal" onclick="document.getElementById('modal-inbox').style.display='none'">✕</button>
+    <h2>📬 Skrzynka odbiorcza</h2>
+    <p>Wpisz swój kod dostępu, aby sprawdzić wiadomości od szkolnego psychologa / wychowawcy.</p>
+    <div class="inbox-code-area">
+      <input type="password" id="inbox_code" placeholder="Twój kod..." autocomplete="off" onkeydown="if(event.key==='Enter') checkInbox()">
+      <button class="btn-inbox-login" onclick="checkInbox()">Sprawdź</button>
     </div>
+    <div id="inbox-messages-area" style="display:none;">
+      <h3>📩 Twoje wiadomości</h3>
+      <div id="inbox-list"></div>
+    </div>
+    <div id="inbox-error" style="color:#ff6060; margin-top:14px; font-size:0.9rem; display:none;">Nieprawidłowy kod lub brak wiadomości.</div>
+  </div>
 </div>
 
 <footer>
-    © 2026 Dobrostan dla ZSTiO Jarosław. <br><br>
-    Zaprojektowane i stworzone przez: <strong>Stanisław Słabicki</strong>
+  © 2026 Dobrostan dla ZSTiO Jarosław. <br><br>
+  Zaprojektowane i stworzone przez: <strong>Stanisław Słabicki</strong>
 </footer>
 
 <script>
-    const CONFIG = {
-        '1':['TE','TG','TI','TM','TP','TS','BS','BK'],
-        '2':['TE','TI','TP','TS','BK','BS'],
-        '3':['TA','TE','TI','TM','TP','TS','BK','BS'],
-        '4':['TE','TG','TI','TM','TP','TS','TT'],
-        '5':['TE','TG','TI','TP','TS']
-    };
+const CONFIG = {'1':['TE','TG','TI','TM','TP','TS' ,'BS','BK'],'2':['TE','TI','TP','TS','BK','BS'],'3':['TA','TE','TI','TM','TP','TS','BK','BS'],'4':['TE','TG','TI','TM','TP','TS','TT'],'5':['TE','TG','TI','TP','TS']};
+let currentTable = "";
+let selectedMood = "";
 
-    let currentTable = "";
-    let selectedMood = "";
-    let selectedReason = "";
+function showStep(id) {
+  document.querySelectorAll('#sekcja-glowna > div').forEach(div => div.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
 
-    function showStep(id) {
-        document.querySelectorAll('#sekcja-glowna > div').forEach(div => div.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
+function selectYear(y) {
+  const cont = document.getElementById('list-profile'); cont.innerHTML = '';
+  CONFIG[y].forEach(p => {
+    let b = document.createElement('button'); b.className = 'btn-wybor'; b.innerText = p;
+    b.onclick = () => { if(['TG','TI','BS','BK','TT'].includes(p)) prepareLogin(y+p); else selectGroup(y+p); };
+    cont.appendChild(b);
+  });
+  showStep('step-profil');
+}
+
+function selectGroup(prefix) {
+  const cont = document.getElementById('list-grupy'); cont.innerHTML = '';
+  const grp = prefix.includes('TM') ? ['_Automatyk','_Mechanik'] : ['G1','G2'];
+  grp.forEach(g => {
+    let b = document.createElement('button'); b.className = 'btn-wybor'; b.innerText = g.replace('_','');
+    b.onclick = () => prepareLogin(prefix+g); cont.appendChild(b);
+  });
+  showStep('step-grupa');
+}
+
+function prepareLogin(table) {
+  currentTable = table;
+  const quote = document.getElementById('teacher-quote');
+  const title = document.getElementById('login-title');
+  if(table === 'Nauczyciele') { quote.classList.remove('hidden'); title.innerText = "Ankieta Nauczyciela"; }
+  else { quote.classList.add('hidden'); title.innerText = "Klasa " + table; }
+  showStep('step-login');
+}
+
+async function handleLogin() {
+  const kod = document.getElementById('user_code').value;
+  const res = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tabela: currentTable, kod: kod })
+  });
+  if(res.ok) {
+    document.getElementById('display-identity').innerText = currentTable;
+    document.getElementById('btn-teacher').classList.add('hidden');
+    document.getElementById('btn-admin').classList.add('hidden');
+    document.getElementById('btn-logout').classList.remove('hidden');
+    showStep('step-vote');
+  } else { alert('Błędny kod!'); }
+}
+
+function handleMoodSelection(mood) {
+  selectedMood = mood;
+  const descBox = document.getElementById('extra-desc-box');
+  document.getElementById('textarea-container').classList.add('hidden');
+  document.getElementById('btn-show-textarea').classList.remove('hidden');
+  document.getElementById('custom-reason-text').value = "";
+  if (mood === 'zle') {
+    descBox.classList.remove('hidden');
+    showStep('step-reason');
+  } else if (mood === 'fatalnie') {
+    descBox.classList.add('hidden');
+    sendVote(null);
+  } else {
+    sendVote(null);
+  }
+}
+
+function showTextArea() {
+  document.getElementById('textarea-container').classList.remove('hidden');
+  document.getElementById('btn-show-textarea').classList.add('hidden');
+}
+
+function sendVoteWithText() {
+  const text = document.getElementById('custom-reason-text').value;
+  if(!text.trim()) { alert("Proszę wpisz coś lub wybierz kategorię z listy powyżej."); return; }
+  sendVote("Opis własny: " + text);
+}
+
+async function sendVote(reason) {
+  try {
+    const res = await fetch('/api/vote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nastroj: selectedMood, tabela: currentTable, powod: reason })
+    });
+    if(res.ok) {
+      if (selectedMood === 'fatalnie') {
+        const help = confirm('Dziękujemy za głos. Pamiętaj, że nie jesteś sam/a. Czy chcesz zobaczyć, gdzie szukać pomocy i wsparcia?');
+        if (help) { window.open('https://twarzedepresji.pl/pomoc-dla-dzieci-i-mlodziezy/', '_blank'); }
+      } else {
+        alert('Dziękujemy za głos!');
+      }
+      setTimeout(() => { location.reload(); }, 300);
+    } else { alert('Błąd zapisu głosu.'); }
+  } catch (error) { alert('Błąd połączenia z serwerem.'); }
+}
+
+async function handleAdminLogin() {
+  const user = document.getElementById('admin_user').value;
+  const pass = document.getElementById('admin_pass').value;
+  try {
+    const res = await fetch('/api/admin_login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user, pass })
+    });
+    const data = await res.json();
+    if (res.ok) { window.location.href = '/stats.html'; }
+    else { alert('BŁĄD: ' + (data.error || "Nieznany błąd logowania")); }
+  } catch (e) { alert("Błąd połączenia: " + e.message); }
+}
+
+// ===== INBOX LOGIC =====
+async function checkInbox() {
+  const kod = document.getElementById('inbox_code').value.trim();
+  if (!kod) return;
+
+  const errEl = document.getElementById('inbox-error');
+  const areaEl = document.getElementById('inbox-messages-area');
+  errEl.style.display = 'none';
+  areaEl.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/get_messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kod })
+    });
+
+    if (!res.ok) {
+      errEl.style.display = 'block';
+      return;
     }
 
-    function selectYear(y) {
-        const cont = document.getElementById('list-profile');
-        cont.innerHTML = '';
-        CONFIG[y].forEach(p => {
-            let b = document.createElement('button');
-            b.className = 'btn-wybor';
-            b.innerText = p;
-            b.onclick = () => {
-                if (['TG','TI','BS','BK','TT'].includes(p)) prepareLogin(y + p);
-                else selectGroup(y + p);
-            };
-            cont.appendChild(b);
-        });
-        showStep('step-profil');
+    const data = await res.json();
+    const messages = data.messages || [];
+
+    if (messages.length === 0) {
+      document.getElementById('inbox-list').innerHTML = `
+        <div class="inbox-empty">
+          <div class="inbox-empty-icon">📭</div>
+          <p>Brak nowych wiadomości.</p>
+        </div>`;
+    } else {
+      document.getElementById('inbox-list').innerHTML = messages.map(msg => `
+        <div class="inbox-msg ${msg.przeczytana ? '' : 'unread'}">
+          <div class="inbox-msg-from">Od: ${escapeHtml(msg.od || 'Szkoła')}</div>
+          <div class="inbox-msg-text">${escapeHtml(msg.tresc)}</div>
+          <div class="inbox-msg-time">${formatMsgDate(msg.kiedy)}</div>
+        </div>
+      `).join('');
     }
 
-    function selectGroup(prefix) {
-        const cont = document.getElementById('list-grupy');
-        cont.innerHTML = '';
-        const grp = prefix.includes('TM') ? ['_Automatyk','_Mechanik'] : ['G1','G2'];
-        grp.forEach(g => {
-            let b = document.createElement('button');
-            b.className = 'btn-wybor';
-            b.innerText = g.replace('_','');
-            b.onclick = () => prepareLogin(prefix + g);
-            cont.appendChild(b);
-        });
-        showStep('step-grupa');
-    }
+    areaEl.style.display = 'block';
 
-    function prepareLogin(table) {
-        currentTable = table;
-        const quote = document.getElementById('teacher-quote');
-        const title = document.getElementById('login-title');
-        if (table === 'Nauczyciele') {
-            quote.classList.remove('hidden');
-            title.innerText = "Ankieta Nauczyciela";
-        } else {
-            quote.classList.add('hidden');
-            title.innerText = "Klasa " + table;
-        }
-        showStep('step-login');
-    }
+    // Mark as read
+    fetch('/api/mark_messages_read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kod })
+    }).catch(() => {});
 
-    async function handleLogin() {
-        const kod = document.getElementById('user_code').value;
-        const res = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tabela: currentTable, kod: kod })
-        });
-        if (res.ok) {
-            document.getElementById('display-identity').innerText = currentTable;
-            document.getElementById('btn-teacher').classList.add('hidden');
-            document.getElementById('btn-admin').classList.add('hidden');
-            document.getElementById('btn-logout').classList.remove('hidden');
-            showStep('step-vote');
-        } else {
-            alert('Błędny kod!');
-        }
-    }
+  } catch(e) {
+    errEl.style.display = 'block';
+  }
+}
 
-    function handleMoodSelection(mood) {
-        selectedMood = mood;
-        selectedReason = "";
+function formatMsgDate(str) {
+  if (!str) return '';
+  try {
+    const d = new Date(str);
+    return d.toLocaleDateString('pl-PL') + ' ' + d.toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'});
+  } catch { return str; }
+}
 
-        if (mood === 'zle') {
-            document.getElementById('extra-desc-box').classList.add('hidden');
-            document.getElementById('textarea-container').classList.add('hidden');
-            document.getElementById('btn-show-textarea').classList.remove('hidden');
-            document.getElementById('reason-text').value = "";
-            document.querySelectorAll('.btn-reason').forEach(btn => {
-                btn.style.background = '#222';
-                btn.style.borderColor = '#444';
-                btn.style.color = 'white';
-            });
-            showStep('step-reason');
+function escapeHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
-        } else {
-            const header = document.getElementById('optional-desc-header');
-            document.getElementById('optional-text').value = "";
-            if (mood === 'dobrze') {
-                header.style.color = 'var(--success)';
-                header.innerText = 'Cieszę się, że czujesz się dobrze! 😊';
-            } else {
-                header.style.color = 'var(--primary)';
-                header.innerText = 'Przykro nam, że czujesz się fatalnie 😖';
-            }
-            showStep('step-optional-desc');
-        }
-    }
-
-    function selectReason(reason) {
-        selectedReason = reason;
-        document.querySelectorAll('.btn-reason').forEach(btn => {
-            const isSelected = btn.innerText === reason;
-            btn.style.background = isSelected ? 'var(--warning)' : '#222';
-            btn.style.borderColor = isSelected ? 'var(--warning)' : '#444';
-            btn.style.color = isSelected ? 'black' : 'white';
-        });
-        document.getElementById('extra-desc-box').classList.remove('hidden');
-    }
-
-    function showTextArea(containerId, btnId) {
-        document.getElementById(containerId).classList.remove('hidden');
-        document.getElementById(btnId).classList.add('hidden');
-    }
-
-    function sendVoteWithText(textareaId) {
-        const text = document.getElementById(textareaId).value;
-        if (!text.trim()) {
-            alert("Proszę wpisz coś lub kliknij 'Wyślij bez opisu'.");
-            return;
-        }
-        sendVote(selectedReason + " | Opis: " + text);
-    }
-
-    function sendVoteWithOptionalText() {
-        const text = document.getElementById('optional-text').value;
-        if (!text.trim()) {
-            alert("Proszę wpisz coś lub kliknij 'Wyślij bez opisu'.");
-            return;
-        }
-        sendVote("Opis: " + text);
-    }
-
-    async function sendVote(reason) {
-        try {
-            const res = await fetch('/api/vote', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nastroj: selectedMood, tabela: currentTable, powod: reason })
-            });
-
-            if (res.ok) {
-                if (selectedMood === 'fatalnie') {
-                    const help = confirm('Dziękujemy za głos. Pamiętaj, że nie jesteś sam/a. Czy chcesz zobaczyć, gdzie szukać pomocy i wsparcia?');
-                    if (help) {
-                        window.open('https://twarzedepresji.pl/pomoc-dla-dzieci-i-mlodziezy/', '_blank');
-                    }
-                } else {
-                    alert('Dziękujemy za głos!');
-                }
-                setTimeout(() => location.reload(), 300);
-            } else {
-                alert('Błąd zapisu głosu.');
-            }
-        } catch (error) {
-            alert('Błąd połączenia z serwerem.');
-        }
-    }
-
-    async function handleAdminLogin() {
-        const user = document.getElementById('admin_user').value;
-        const pass = document.getElementById('admin_pass').value;
-        try {
-            const res = await fetch('/api/admin_login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user, pass })
-            });
-            const data = await res.json();
-            if (res.ok) {
-                window.location.href = '/stats.html';
-            } else {
-                alert('BŁĄD: ' + (data.error || "Nieznany błąd logowania"));
-            }
-        } catch (e) {
-            alert("Błąd połączenia: " + e.message);
-        }
-    }
+// Close inbox modal on backdrop click
+document.getElementById('modal-inbox').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+document.getElementById('modal-admin').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
 </script>
 </body>
 </html>
