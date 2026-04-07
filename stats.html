@@ -605,39 +605,33 @@ function useTemplate(idx) {
 
 async function sendMessage() {
   const text = document.getElementById('msg-text').value.trim();
-  if (!text) { alert('Wpisz treść wiadomości.'); return; }
-  if (!currentMsgTarget) return;
+  if (!text || !currentMsgTarget) return;
 
   const btn = document.getElementById('msg-send-btn');
   btn.disabled = true;
-  btn.textContent = 'Wysyłanie...';
 
   try {
     const res = await fetch('/api/send_message', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        kod_odbiorcy: currentMsgTarget.kod,
-        klasa_odbiorcy: currentMsgTarget.kto,
+        kod_odbiorcy: currentMsgTarget.kod, // Używamy unikalnego kodu ucznia
         tresc: text,
-        od: 'Pedagog/Wychowawca'
+        od: 'Pedagog ZSTiO'
       })
     });
 
     if (res.ok) {
       document.getElementById('msg-send-btn').style.display = 'none';
       document.getElementById('msg-success-box').style.display = 'block';
-      setTimeout(closeMsgModal, 2500);
+      setTimeout(closeMsgModal, 2000);
     } else {
-      const err = await res.json().catch(() => ({}));
-      alert('Błąd: ' + (err.error || 'Nie udało się wysłać wiadomości.'));
+      alert('Błąd wysyłania');
       btn.disabled = false;
-      btn.textContent = '📤 Wyślij wiadomość';
     }
   } catch(e) {
-    alert('Błąd połączenia: ' + e.message);
+    console.error(e);
     btn.disabled = false;
-    btn.textContent = '📤 Wyślij wiadomość';
   }
 }
 
