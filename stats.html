@@ -93,6 +93,7 @@ tbody tr { border-bottom: 1px solid #151515; transition: background 0.15s; }
 tbody tr:hover { background: var(--surface2); }
 td { padding: 11px 16px; vertical-align: middle; }
 .td-class { font-family: 'DM Mono', monospace; font-weight: 500; font-size: 0.82rem; color: #5dade2; }
+.td-code { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: #888; background: #1a1a1a; padding: 2px 6px; border-radius: 4px; border: 1px solid #333; }
 .mood-badge { padding: 3px 10px; border-radius: 99px; font-size: 0.72rem; font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
 .mood-badge.dobrze { background: rgba(34,197,94,0.12); color: var(--success); border: 1px solid rgba(34,197,94,0.2); }
 .mood-badge.zle { background: rgba(245,158,11,0.12); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
@@ -343,6 +344,7 @@ td { padding: 11px 16px; vertical-align: middle; }
           <thead>
             <tr>
               <th>Klasa</th>
+              <th>Kod</th>
               <th>Nastrój</th>
               <th>Powód / Opis</th>
               <th>Data i godzina</th>
@@ -350,7 +352,7 @@ td { padding: 11px 16px; vertical-align: middle; }
             </tr>
           </thead>
           <tbody id="votes-tbody">
-            <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">⏳</div><p>Ładowanie danych...</p></div></td></tr>
+            <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">⏳</div><p>Ładowanie danych...</p></div></td></tr>
           </tbody>
         </table>
       </div>
@@ -368,7 +370,6 @@ td { padding: 11px 16px; vertical-align: middle; }
   </div>
 </div>
 
-<!-- RESET MODAL -->
 <div class="modal-overlay" id="modal-reset">
   <div class="modal-box">
     <h3>⚠️ Resetuj dane</h3>
@@ -380,7 +381,6 @@ td { padding: 11px 16px; vertical-align: middle; }
   </div>
 </div>
 
-<!-- SEND MESSAGE MODAL -->
 <div class="modal-overlay" id="modal-send-msg">
   <div class="msg-modal-box">
     <button class="msg-close-btn" onclick="closeMsgModal()">✕</button>
@@ -501,7 +501,6 @@ function setFilter(mood) {
   renderTable();
 }
 
-// Check if a person has multiple consecutive "fatalnie" votes
 function getFatalStreakCount(kto) {
   const userVotes = rawVotes
     .filter(v => v.kto === kto)
@@ -522,7 +521,7 @@ function renderTable() {
 
   let votes = [...rawVotes];
   if (activeFilter !== 'all') votes = votes.filter(v => v.nastroj === activeFilter);
-  if (search) votes = votes.filter(v => (v.kto||'').toLowerCase().includes(search) || (v.powod||'').toLowerCase().includes(search));
+  if (search) votes = votes.filter(v => (v.kto||'').toLowerCase().includes(search) || (v.powod||'').toLowerCase().includes(search) || (v.kod||'').toLowerCase().includes(search));
   if (sort==='newest') votes.sort((a,b)=>new Date(b.kiedy)-new Date(a.kiedy));
   else if (sort==='oldest') votes.sort((a,b)=>new Date(a.kiedy)-new Date(b.kiedy));
   else if (sort==='class') votes.sort((a,b)=>(a.kto||'').localeCompare(b.kto||''));
@@ -530,7 +529,7 @@ function renderTable() {
   document.getElementById('result-count').innerText = votes.length + ' wyników';
 
   if (votes.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🔍</div><p>Brak wyników dla wybranych filtrów</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🔍</div><p>Brak wyników dla wybranych filtrów</p></div></td></tr>`;
     return;
   }
 
@@ -543,14 +542,14 @@ function renderTable() {
       ? `<span class="fatal-alert-badge">⚠ ${streak}× z rzędu</span>`
       : '';
 
-    // Action button - show for fatal or high streak
-        // Zmień tę linię w funkcji renderTable():
-const actionBtn = (isFatal || streak >= 2)
-  ? `<button class="btn-send-msg" onclick='openMsgModal(${JSON.stringify(v.kto || "?")}, ${JSON.stringify(v.kod || "")})'>✉ Wyślij</button>`
-  : `<span style="color:#333;font-size:0.75rem;font-family:'DM Mono',monospace;">—</span>`;
+    // Action button - poprawione cudzysłowy i przekazywanie KODU
+    const actionBtn = (isFatal || streak >= 2)
+      ? `<button class="btn-send-msg" onclick='openMsgModal(${JSON.stringify(v.kto || "?")}, ${JSON.stringify(v.kod || "")})'>✉ Wyślij</button>`
+      : `<span style="color:#333;font-size:0.75rem;font-family:'DM Mono',monospace;">—</span>`;
 
     return `<tr style="animation:rowIn 0.2s ${Math.min(i*0.025,0.4)}s ease both">
       <td><span class="td-class">${escapeHtml(v.kto||'—')}</span>${streakBadge}</td>
+      <td><span class="td-code">${escapeHtml(v.kod||'???')}</span></td>
       <td><span class="mood-badge ${v.nastroj}">${ml[v.nastroj]||v.nastroj}</span></td>
       <td>${ok ? `<span class="td-reason">${escapeHtml(v.powod)}</span>` : `<span class="td-reason no-reason">brak opisu</span>`}</td>
       <td><span class="td-time">${formatDate(v.kiedy)}</span></td>
@@ -582,10 +581,9 @@ function renderReasons() {
     </div>`).join('');
 }
 
-// ===== SEND MESSAGE LOGIC =====
 function openMsgModal(kto, kod) {
   currentMsgTarget = { kto, kod };
-  document.getElementById('msg-recipient-display').textContent = kto || '(brak identyfikatora)';
+  document.getElementById('msg-recipient-display').textContent = (kto + " (" + kod + ")") || '(brak identyfikatora)';
   document.getElementById('msg-text').value = '';
   document.getElementById('msg-success-box').style.display = 'none';
   document.getElementById('msg-send-btn').style.display = 'block';
@@ -609,29 +607,34 @@ async function sendMessage() {
 
   const btn = document.getElementById('msg-send-btn');
   btn.disabled = true;
+  btn.textContent = 'Wysyłanie...';
 
   try {
     const res = await fetch('/api/send_message', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        kod_odbiorcy: currentMsgTarget.kod, // Używamy unikalnego kodu ucznia
+        kod_odbiorcy: currentMsgTarget.kod,
+        klasa_odbiorcy: currentMsgTarget.kto,
         tresc: text,
-        od: 'Pedagog ZSTiO'
+        od: 'Pedagog/Wychowawca'
       })
     });
 
     if (res.ok) {
       document.getElementById('msg-send-btn').style.display = 'none';
       document.getElementById('msg-success-box').style.display = 'block';
-      setTimeout(closeMsgModal, 2000);
+      setTimeout(closeMsgModal, 2500);
     } else {
-      alert('Błąd wysyłania');
+      const err = await res.json().catch(() => ({}));
+      alert('Błąd: ' + (err.error || 'Nie udało się wysłać wiadomości.'));
       btn.disabled = false;
+      btn.textContent = '📤 Wyślij wiadomość';
     }
   } catch(e) {
-    console.error(e);
+    alert('Błąd połączenia: ' + e.message);
     btn.disabled = false;
+    btn.textContent = '📤 Wyślij wiadomość';
   }
 }
 
