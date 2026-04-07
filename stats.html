@@ -1,469 +1,693 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Statystyk PRO - ZSTiO</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #dc3545;
-            --bg: #080808;
-            --surface: #111111;
-            --surface2: #181818;
-            --border: #232323;
-            --success: #22c55e;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --text: #f0f0f0;
-            --muted: #555;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
-        body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(220,53,69,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(220,53,69,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Statystyk PRO - ZSTiO</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #dc3545;
+  --bg: #080808;
+  --surface: #111111;
+  --surface2: #181818;
+  --border: #232323;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --text: #f0f0f0;
+  --muted: #555;
+  --inbox: #6060ff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(220,53,69,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(220,53,69,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+.topbar { position: sticky; top: 0; z-index: 100; background: rgba(8,8,8,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+.topbar-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.5px; }
+.topbar-logo span { color: var(--primary); }
+.topbar-badge { font-family: 'DM Mono', monospace; font-size: 0.7rem; background: rgba(220,53,69,0.1); color: var(--primary); border: 1px solid rgba(220,53,69,0.2); padding: 3px 8px; border-radius: 4px; letter-spacing: 1px; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.live-dot { width: 7px; height: 7px; background: var(--success); border-radius: 50%; animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)} }
+.live-label { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--success); letter-spacing: 1px; }
+.btn-topbar { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; transition: 0.2s; }
+.btn-topbar:hover { border-color: #555; color: #aaa; }
+.btn-reset { background: transparent; border: 1px solid rgba(239,68,68,0.3); color: rgba(239,68,68,0.7); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; transition: 0.2s; }
+.btn-reset:hover { border-color: var(--danger); color: var(--danger); background: rgba(239,68,68,0.05); }
+.main { position: relative; z-index: 1; padding: 32px; max-width: 1400px; margin: 0 auto; }
+.page-header { margin-bottom: 36px; animation: fadeUp 0.5s ease both; }
+.page-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2.4rem; letter-spacing: -1px; line-height: 1; margin-bottom: 6px; }
+.page-title span { color: var(--primary); }
+.page-subtitle { color: var(--muted); font-size: 0.9rem; font-family: 'DM Mono', monospace; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
+.db-alert { display: none; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-family: 'DM Mono', monospace; font-size: 0.8rem; color: #ff9999; }
+.db-alert.show { display: block; }
+.kpi-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; animation: fadeUp 0.5s 0.1s ease both; }
+.kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s; }
+.kpi:hover { transform: translateY(-2px); }
+.kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.kpi.total::before { background: linear-gradient(90deg,#555,#333); }
+.kpi.good::before { background: var(--success); }
+.kpi.bad::before { background: var(--warning); }
+.kpi.fatal::before { background: var(--danger); }
+.kpi-label { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+.kpi-value { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2.2rem; line-height: 1; margin-bottom: 4px; }
+.kpi.total .kpi-value { color: #fff; }
+.kpi.good .kpi-value { color: var(--success); }
+.kpi.bad .kpi-value { color: var(--warning); }
+.kpi.fatal .kpi-value { color: var(--danger); }
+.kpi-pct { font-size: 0.8rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+.dashboard-grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; margin-bottom: 20px; animation: fadeUp 0.5s 0.2s ease both; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.panel-header { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.panel-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; }
+.panel-body { padding: 22px; }
+.chart-wrap { position: relative; width: 190px; height: 190px; margin: 0 auto 20px; }
+.chart-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
+.chart-center-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.8rem; line-height: 1; }
+.chart-center-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.legend-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.legend-item { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px 10px; border-radius: 8px; transition: background 0.15s; border: 1px solid transparent; }
+.legend-item:hover, .legend-item.active { background: var(--surface2); border-color: var(--border); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legend-name { flex: 1; font-size: 0.85rem; }
+.legend-count { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--muted); }
+.filter-bar { padding: 14px 22px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.filter-pill { padding: 6px 14px; border-radius: 99px; font-size: 0.78rem; font-family: 'DM Mono', monospace; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--muted); transition: 0.15s; letter-spacing: 0.5px; }
+.filter-pill:hover { color: #fff; border-color: #555; }
+.filter-pill.active-all { color: #fff; border-color: #555; background: var(--surface2); }
+.filter-pill.active-good { color: var(--success); border-color: var(--success); background: rgba(34,197,94,0.08); }
+.filter-pill.active-bad { color: var(--warning); border-color: var(--warning); background: rgba(245,158,11,0.08); }
+.filter-pill.active-fatal { color: var(--danger); border-color: var(--danger); background: rgba(239,68,68,0.08); }
+.filter-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 7px 12px; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 0.82rem; outline: none; flex: 1; min-width: 160px; transition: border-color 0.2s; }
+.filter-input:focus { border-color: var(--primary); }
+.filter-input::placeholder { color: var(--muted); }
+.filter-select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 7px 12px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer; outline: none; }
+.votes-table-wrap { overflow-y: auto; max-height: 440px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead th { padding: 10px 16px; text-align: left; font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); }
+tbody tr { border-bottom: 1px solid #151515; transition: background 0.15s; }
+tbody tr:hover { background: var(--surface2); }
+td { padding: 11px 16px; vertical-align: middle; }
+.td-class { font-family: 'DM Mono', monospace; font-weight: 500; font-size: 0.82rem; color: #5dade2; }
+.mood-badge { padding: 3px 10px; border-radius: 99px; font-size: 0.72rem; font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+.mood-badge.dobrze { background: rgba(34,197,94,0.12); color: var(--success); border: 1px solid rgba(34,197,94,0.2); }
+.mood-badge.zle { background: rgba(245,158,11,0.12); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
+.mood-badge.fatalnie { background: rgba(239,68,68,0.12); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+.td-reason { color: #aaa; font-size: 0.8rem; max-width: 280px; word-break: break-word; }
+.td-reason.no-reason { color: #333; font-style: italic; }
+.td-time { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+.empty-state { text-align: center; padding: 50px 20px; color: var(--muted); }
+.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+.empty-state p { font-size: 0.85rem; font-family: 'DM Mono', monospace; }
+.reasons-grid { animation: fadeUp 0.5s 0.3s ease both; }
+.reason-bar-item { margin-bottom: 16px; }
+.reason-bar-top { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.82rem; }
+.reason-bar-name { color: #ccc; }
+.reason-bar-count { font-family: 'DM Mono', monospace; color: var(--muted); font-size: 0.75rem; }
+.reason-bar-track { height: 5px; background: #1f1f1f; border-radius: 99px; overflow: hidden; }
+.reason-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--primary), #ff6b6b); transition: width 0.8s cubic-bezier(0.4,0,0.2,1); width: 0%; }
 
-        .topbar { position: sticky; top: 0; z-index: 100; background: rgba(8,8,8,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
-        .topbar-left { display: flex; align-items: center; gap: 16px; }
-        .topbar-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.5px; }
-        .topbar-logo span { color: var(--primary); }
-        .topbar-badge { font-family: 'DM Mono', monospace; font-size: 0.7rem; background: rgba(220,53,69,0.1); color: var(--primary); border: 1px solid rgba(220,53,69,0.2); padding: 3px 8px; border-radius: 4px; letter-spacing: 1px; }
-        .topbar-right { display: flex; align-items: center; gap: 12px; }
-        .live-dot { width: 7px; height: 7px; background: var(--success); border-radius: 50%; animation: pulse-dot 2s ease-in-out infinite; }
-        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)} }
-        .live-label { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--success); letter-spacing: 1px; }
-        .btn-topbar { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; transition: 0.2s; }
-        .btn-topbar:hover { border-color: #555; color: #aaa; }
-        .btn-reset { background: transparent; border: 1px solid rgba(239,68,68,0.3); color: rgba(239,68,68,0.7); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; transition: 0.2s; }
-        .btn-reset:hover { border-color: var(--danger); color: var(--danger); background: rgba(239,68,68,0.05); }
+/* Send message button in table */
+.btn-send-msg {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: rgba(96,96,255,0.1);
+  color: #a0a8ff;
+  border: 1px solid rgba(96,96,255,0.25);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-family: 'DM Mono', monospace;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+.btn-send-msg:hover { background: rgba(96,96,255,0.2); border-color: rgba(96,96,255,0.5); color: #c0c8ff; }
 
-        .main { position: relative; z-index: 1; padding: 32px; max-width: 1400px; margin: 0 auto; }
-        .page-header { margin-bottom: 36px; animation: fadeUp 0.5s ease both; }
-        .page-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2.4rem; letter-spacing: -1px; line-height: 1; margin-bottom: 6px; }
-        .page-title span { color: var(--primary); }
-        .page-subtitle { color: var(--muted); font-size: 0.9rem; font-family: 'DM Mono', monospace; }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
+/* Alert badge for fatal streak */
+.fatal-alert-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: rgba(239,68,68,0.15);
+  color: #ff8888;
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-family: 'DM Mono', monospace;
+  margin-left: 6px;
+  animation: blink-alert 2s ease-in-out infinite;
+}
+@keyframes blink-alert { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
-        .db-alert { display: none; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-family: 'DM Mono', monospace; font-size: 0.8rem; color: #ff9999; }
-        .db-alert.show { display: block; }
+/* Modal styles */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(4px); }
+.modal-overlay.show { display: flex; }
+.modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 30px; max-width: 380px; width: 90%; text-align: center; }
+.modal-box h3 { font-family: 'Syne', sans-serif; font-size: 1.2rem; margin-bottom: 10px; }
+.modal-box p { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; line-height: 1.6; }
+.modal-btns { display: flex; gap: 10px; justify-content: center; }
+.btn-cancel { background: var(--surface2); border: 1px solid var(--border); color: #aaa; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; transition: 0.2s; }
+.btn-cancel:hover { color: #fff; }
+.btn-confirm-reset { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--danger); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; transition: 0.2s; }
+.btn-confirm-reset:hover { background: rgba(239,68,68,0.2); border-color: var(--danger); }
 
-        .kpi-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; animation: fadeUp 0.5s 0.1s ease both; }
-        .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s; }
-        .kpi:hover { transform: translateY(-2px); }
-        .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
-        .kpi.total::before { background: linear-gradient(90deg,#555,#333); }
-        .kpi.good::before  { background: var(--success); }
-        .kpi.bad::before   { background: var(--warning); }
-        .kpi.fatal::before { background: var(--danger); }
-        .kpi-label { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
-        .kpi-value { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2.2rem; line-height: 1; margin-bottom: 4px; }
-        .kpi.total .kpi-value { color: #fff; }
-        .kpi.good  .kpi-value { color: var(--success); }
-        .kpi.bad   .kpi-value { color: var(--warning); }
-        .kpi.fatal .kpi-value { color: var(--danger); }
-        .kpi-pct { font-size: 0.8rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+/* Send message modal */
+.msg-modal-box {
+  background: var(--surface);
+  border: 1px solid #2a2a4a;
+  border-radius: 18px;
+  padding: 32px 28px;
+  max-width: 460px;
+  width: 92%;
+  position: relative;
+}
+.msg-modal-box h3 { font-family: 'Syne', sans-serif; font-size: 1.15rem; margin-bottom: 4px; color: #a0a8ff; }
+.msg-modal-subtitle { color: var(--muted); font-size: 0.82rem; font-family: 'DM Mono', monospace; margin-bottom: 20px; }
+.msg-recipient-info {
+  background: rgba(96,96,255,0.08);
+  border: 1px solid rgba(96,96,255,0.2);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+  font-size: 0.85rem;
+}
+.msg-recipient-info .label { color: var(--muted); font-size: 0.72rem; font-family: 'DM Mono', monospace; margin-bottom: 4px; }
+.msg-recipient-info .value { color: #a0a8ff; font-weight: 600; }
+.msg-textarea {
+  width: 100%;
+  min-height: 120px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 16px;
+}
+.msg-textarea:focus { border-color: var(--inbox); }
+.msg-templates { margin-bottom: 16px; }
+.msg-templates-label { font-size: 0.72rem; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+.msg-template-btn {
+  display: inline-block;
+  padding: 5px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: #aaa;
+  font-size: 0.78rem;
+  cursor: pointer;
+  margin: 3px;
+  transition: 0.15s;
+}
+.msg-template-btn:hover { background: #222; color: #ddd; border-color: #444; }
+.msg-send-btn {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #3333aa, #5555cc);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.msg-send-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.msg-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.msg-close-btn { position: absolute; top: 14px; right: 18px; background: none; border: none; color: var(--muted); font-size: 1.3rem; cursor: pointer; transition: color 0.2s; }
+.msg-close-btn:hover { color: #fff; }
+.msg-success { text-align: center; padding: 20px 0; color: var(--success); font-family: 'Syne', sans-serif; font-size: 1rem; }
+.msg-success-icon { font-size: 2.5rem; margin-bottom: 10px; }
 
-        .dashboard-grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; margin-bottom: 20px; animation: fadeUp 0.5s 0.2s ease both; }
-        .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
-        .panel-header { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-        .panel-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; }
-        .panel-body { padding: 22px; }
-
-        .chart-wrap { position: relative; width: 190px; height: 190px; margin: 0 auto 20px; }
-        .chart-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
-        .chart-center-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.8rem; line-height: 1; }
-        .chart-center-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-
-        .legend-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-        .legend-item { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px 10px; border-radius: 8px; transition: background 0.15s; border: 1px solid transparent; }
-        .legend-item:hover, .legend-item.active { background: var(--surface2); border-color: var(--border); }
-        .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-        .legend-name { flex: 1; font-size: 0.85rem; }
-        .legend-count { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--muted); }
-
-        .filter-bar { padding: 14px 22px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-        .filter-pill { padding: 6px 14px; border-radius: 99px; font-size: 0.78rem; font-family: 'DM Mono', monospace; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--muted); transition: 0.15s; letter-spacing: 0.5px; }
-        .filter-pill:hover { color: #fff; border-color: #555; }
-        .filter-pill.active-all   { color: #fff;           border-color: #555;           background: var(--surface2); }
-        .filter-pill.active-good  { color: var(--success); border-color: var(--success); background: rgba(34,197,94,0.08); }
-        .filter-pill.active-bad   { color: var(--warning); border-color: var(--warning); background: rgba(245,158,11,0.08); }
-        .filter-pill.active-fatal { color: var(--danger);  border-color: var(--danger);  background: rgba(239,68,68,0.08); }
-        .filter-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 7px 12px; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 0.82rem; outline: none; flex: 1; min-width: 160px; transition: border-color 0.2s; }
-        .filter-input:focus { border-color: var(--primary); }
-        .filter-input::placeholder { color: var(--muted); }
-        .filter-select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 7px 12px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer; outline: none; }
-
-        .votes-table-wrap { overflow-y: auto; max-height: 440px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        thead th { padding: 10px 16px; text-align: left; font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); }
-        tbody tr { border-bottom: 1px solid #151515; transition: background 0.15s; }
-        tbody tr:hover { background: var(--surface2); }
-        td { padding: 11px 16px; vertical-align: middle; }
-        .td-class { font-family: 'DM Mono', monospace; font-weight: 500; font-size: 0.82rem; color: #5dade2; }
-        .mood-badge { padding: 3px 10px; border-radius: 99px; font-size: 0.72rem; font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
-        .mood-badge.dobrze   { background: rgba(34,197,94,0.12);  color: var(--success); border: 1px solid rgba(34,197,94,0.2); }
-        .mood-badge.zle      { background: rgba(245,158,11,0.12); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
-        .mood-badge.fatalnie { background: rgba(239,68,68,0.12);  color: var(--danger);  border: 1px solid rgba(239,68,68,0.2); }
-        .td-reason { color: #aaa; font-size: 0.8rem; max-width: 280px; word-break: break-word; }
-        .td-reason.no-reason { color: #333; font-style: italic; }
-        .td-time { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
-        .empty-state { text-align: center; padding: 50px 20px; color: var(--muted); }
-        .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
-        .empty-state p { font-size: 0.85rem; font-family: 'DM Mono', monospace; }
-
-        .reasons-grid { animation: fadeUp 0.5s 0.3s ease both; }
-        .reason-bar-item { margin-bottom: 16px; }
-        .reason-bar-top { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.82rem; }
-        .reason-bar-name { color: #ccc; }
-        .reason-bar-count { font-family: 'DM Mono', monospace; color: var(--muted); font-size: 0.75rem; }
-        .reason-bar-track { height: 5px; background: #1f1f1f; border-radius: 99px; overflow: hidden; }
-        .reason-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--primary), #ff6b6b); transition: width 0.8s cubic-bezier(0.4,0,0.2,1); width: 0%; }
-
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(4px); }
-        .modal-overlay.show { display: flex; }
-        .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 30px; max-width: 380px; width: 90%; text-align: center; }
-        .modal-box h3 { font-family: 'Syne', sans-serif; font-size: 1.2rem; margin-bottom: 10px; }
-        .modal-box p { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; line-height: 1.6; }
-        .modal-btns { display: flex; gap: 10px; justify-content: center; }
-        .btn-cancel { background: var(--surface2); border: 1px solid var(--border); color: #aaa; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; transition: 0.2s; }
-        .btn-cancel:hover { color: #fff; }
-        .btn-confirm-reset { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--danger); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; transition: 0.2s; }
-        .btn-confirm-reset:hover { background: rgba(239,68,68,0.2); border-color: var(--danger); }
-
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #282828; border-radius: 99px; }
-
-        @keyframes rowIn { from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)} }
-
-        @media (max-width: 900px) {
-            .dashboard-grid { grid-template-columns: 1fr; }
-            .kpi-strip { grid-template-columns: repeat(2,1fr); }
-            .main { padding: 16px; }
-        }
-    </style>
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #282828; border-radius: 99px; }
+@keyframes rowIn { from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)} }
+@media (max-width: 900px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .kpi-strip { grid-template-columns: repeat(2,1fr); }
+  .main { padding: 16px; }
+}
+</style>
 </head>
 <body>
 
 <div class="topbar">
-    <div class="topbar-left">
-        <div class="topbar-logo"><span>ZST</span>i<span>O</span> Jarosław</div>
-        <div class="topbar-badge">ADMIN</div>
-    </div>
-    <div class="topbar-right">
-        <div class="live-dot"></div>
-        <span class="live-label">LIVE</span>
-        <button class="btn-reset" onclick="openResetModal()">🗑 Resetuj dane</button>
-        <button class="btn-topbar" onclick="location.href='/'">← Wyloguj</button>
-    </div>
+  <div class="topbar-left">
+    <div class="topbar-logo"><span>ZST</span>i<span>O</span> Jarosław</div>
+    <div class="topbar-badge">ADMIN</div>
+  </div>
+  <div class="topbar-right">
+    <div class="live-dot"></div>
+    <span class="live-label">LIVE</span>
+    <button class="btn-reset" onclick="openResetModal()">🗑 Resetuj dane</button>
+    <button class="btn-topbar" onclick="location.href='/'">← Wyloguj</button>
+  </div>
 </div>
 
 <div class="main">
-    <div class="page-header">
-        <div class="page-title">Wyniki <span>Dobrostanu</span></div>
-        <div class="page-subtitle" id="last-update">Ładowanie danych...</div>
+  <div class="page-header">
+    <div class="page-title">Wyniki <span>Dobrostanu</span></div>
+    <div class="page-subtitle" id="last-update">Ładowanie danych...</div>
+  </div>
+
+  <div class="db-alert" id="db-alert"></div>
+
+  <div class="kpi-strip">
+    <div class="kpi total">
+      <div class="kpi-label">Wszystkie głosy</div>
+      <div class="kpi-value" id="kpi-total">0</div>
+      <div class="kpi-pct">dzisiaj + archiwum</div>
+    </div>
+    <div class="kpi good">
+      <div class="kpi-label">Dobrze 😊</div>
+      <div class="kpi-value" id="kpi-good">0</div>
+      <div class="kpi-pct" id="kpi-good-pct">–</div>
+    </div>
+    <div class="kpi bad">
+      <div class="kpi-label">Źle 😐</div>
+      <div class="kpi-value" id="kpi-bad">0</div>
+      <div class="kpi-pct" id="kpi-bad-pct">–</div>
+    </div>
+    <div class="kpi fatal">
+      <div class="kpi-label">Fatalnie 😖</div>
+      <div class="kpi-value" id="kpi-fatal">0</div>
+      <div class="kpi-pct" id="kpi-fatal-pct">–</div>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Rozkład nastrojów</span>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap">
+          <canvas id="chart"></canvas>
+          <div class="chart-center">
+            <div class="chart-center-num" id="chart-total">0</div>
+            <div class="chart-center-label">głosów</div>
+          </div>
+        </div>
+        <ul class="legend-list">
+          <li class="legend-item" onclick="setFilter('dobrze')" data-mood="dobrze">
+            <div class="legend-dot" style="background:var(--success)"></div>
+            <span class="legend-name">Dobrze</span>
+            <span class="legend-count" id="leg-good">0</span>
+          </li>
+          <li class="legend-item" onclick="setFilter('zle')" data-mood="zle">
+            <div class="legend-dot" style="background:var(--warning)"></div>
+            <span class="legend-name">Źle</span>
+            <span class="legend-count" id="leg-bad">0</span>
+          </li>
+          <li class="legend-item" onclick="setFilter('fatalnie')" data-mood="fatalnie">
+            <div class="legend-dot" style="background:var(--danger)"></div>
+            <span class="legend-name">Fatalnie</span>
+            <span class="legend-count" id="leg-fatal">0</span>
+          </li>
+        </ul>
+      </div>
     </div>
 
-    <div class="db-alert" id="db-alert"></div>
-
-    <div class="kpi-strip">
-        <div class="kpi total">
-            <div class="kpi-label">Wszystkie głosy</div>
-            <div class="kpi-value" id="kpi-total">0</div>
-            <div class="kpi-pct">dzisiaj + archiwum</div>
-        </div>
-        <div class="kpi good">
-            <div class="kpi-label">Dobrze 😊</div>
-            <div class="kpi-value" id="kpi-good">0</div>
-            <div class="kpi-pct" id="kpi-good-pct">–</div>
-        </div>
-        <div class="kpi bad">
-            <div class="kpi-label">Źle 😐</div>
-            <div class="kpi-value" id="kpi-bad">0</div>
-            <div class="kpi-pct" id="kpi-bad-pct">–</div>
-        </div>
-        <div class="kpi fatal">
-            <div class="kpi-label">Fatalnie 😖</div>
-            <div class="kpi-value" id="kpi-fatal">0</div>
-            <div class="kpi-pct" id="kpi-fatal-pct">–</div>
-        </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Szczegółowe głosy</span>
+        <span id="result-count" style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);">0 wyników</span>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-pill active-all" onclick="setFilter('all')" id="pill-all">Wszystkie</button>
+        <button class="filter-pill" onclick="setFilter('dobrze')" id="pill-dobrze">😊 Dobrze</button>
+        <button class="filter-pill" onclick="setFilter('zle')" id="pill-zle">😐 Źle</button>
+        <button class="filter-pill" onclick="setFilter('fatalnie')" id="pill-fatalnie">😖 Fatalnie</button>
+        <input class="filter-input" id="search-input" placeholder="Szukaj klasy lub powodu..." oninput="renderTable()">
+        <select class="filter-select" id="sort-select" onchange="renderTable()">
+          <option value="newest">Najnowsze</option>
+          <option value="oldest">Najstarsze</option>
+          <option value="class">Klasa A–Z</option>
+        </select>
+      </div>
+      <div class="votes-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Klasa</th>
+              <th>Nastrój</th>
+              <th>Powód / Opis</th>
+              <th>Data i godzina</th>
+              <th>Akcja</th>
+            </tr>
+          </thead>
+          <tbody id="votes-tbody">
+            <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">⏳</div><p>Ładowanie danych...</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
+  </div>
 
-    <div class="dashboard-grid">
-        <div class="panel">
-            <div class="panel-header">
-                <span class="panel-title">Rozkład nastrojów</span>
-            </div>
-            <div class="panel-body">
-                <div class="chart-wrap">
-                    <canvas id="chart"></canvas>
-                    <div class="chart-center">
-                        <div class="chart-center-num" id="chart-total">0</div>
-                        <div class="chart-center-label">głosów</div>
-                    </div>
-                </div>
-                <ul class="legend-list">
-                    <li class="legend-item" onclick="setFilter('dobrze')" data-mood="dobrze">
-                        <div class="legend-dot" style="background:var(--success)"></div>
-                        <span class="legend-name">Dobrze</span>
-                        <span class="legend-count" id="leg-good">0</span>
-                    </li>
-                    <li class="legend-item" onclick="setFilter('zle')" data-mood="zle">
-                        <div class="legend-dot" style="background:var(--warning)"></div>
-                        <span class="legend-name">Źle</span>
-                        <span class="legend-count" id="leg-bad">0</span>
-                    </li>
-                    <li class="legend-item" onclick="setFilter('fatalnie')" data-mood="fatalnie">
-                        <div class="legend-dot" style="background:var(--danger)"></div>
-                        <span class="legend-name">Fatalnie</span>
-                        <span class="legend-count" id="leg-fatal">0</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="panel">
-            <div class="panel-header">
-                <span class="panel-title">Szczegółowe głosy</span>
-                <span id="result-count" style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);">0 wyników</span>
-            </div>
-            <div class="filter-bar">
-                <button class="filter-pill active-all" onclick="setFilter('all')"      id="pill-all">Wszystkie</button>
-                <button class="filter-pill"            onclick="setFilter('dobrze')"   id="pill-dobrze">😊 Dobrze</button>
-                <button class="filter-pill"            onclick="setFilter('zle')"      id="pill-zle">😐 Źle</button>
-                <button class="filter-pill"            onclick="setFilter('fatalnie')" id="pill-fatalnie">😖 Fatalnie</button>
-                <input  class="filter-input" id="search-input" placeholder="Szukaj klasy lub powodu..." oninput="renderTable()">
-                <select class="filter-select" id="sort-select" onchange="renderTable()">
-                    <option value="newest">Najnowsze</option>
-                    <option value="oldest">Najstarsze</option>
-                    <option value="class">Klasa A–Z</option>
-                </select>
-            </div>
-            <div class="votes-table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Klasa</th>
-                            <th>Nastrój</th>
-                            <th>Powód / Opis</th>
-                            <th>Data i godzina</th>
-                        </tr>
-                    </thead>
-                    <tbody id="votes-tbody">
-                        <tr><td colspan="4"><div class="empty-state"><div class="empty-icon">⏳</div><p>Ładowanie danych...</p></div></td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+  <div class="panel reasons-grid">
+    <div class="panel-header">
+      <span class="panel-title">Top powody złego samopoczucia</span>
+      <span style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted);">tylko głosy ZŁE + FATALNE</span>
     </div>
-
-    <div class="panel reasons-grid">
-        <div class="panel-header">
-            <span class="panel-title">Top powody złego samopoczucia</span>
-            <span style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted);">tylko głosy ZŁE + FATALNE</span>
-        </div>
-        <div class="panel-body" id="reasons-body">
-            <p style="color:var(--muted);font-size:0.85rem;font-family:'DM Mono',monospace;">Brak danych</p>
-        </div>
+    <div class="panel-body" id="reasons-body">
+      <p style="color:var(--muted);font-size:0.85rem;font-family:'DM Mono',monospace;">Brak danych</p>
     </div>
+  </div>
 </div>
 
+<!-- RESET MODAL -->
 <div class="modal-overlay" id="modal-reset">
-    <div class="modal-box">
-        <h3>⚠️ Resetuj dane</h3>
-        <p>Czy na pewno chcesz usunąć <strong>wszystkie głosy</strong> z bazy?<br>Tej operacji nie można cofnąć.</p>
-        <div class="modal-btns">
-            <button class="btn-cancel" onclick="closeResetModal()">Anuluj</button>
-            <button class="btn-confirm-reset" onclick="doReset()">Tak, usuń wszystko</button>
-        </div>
+  <div class="modal-box">
+    <h3>⚠️ Resetuj dane</h3>
+    <p>Czy na pewno chcesz usunąć <strong>wszystkie głosy</strong> z bazy?<br>Tej operacji nie można cofnąć.</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeResetModal()">Anuluj</button>
+      <button class="btn-confirm-reset" onclick="doReset()">Tak, usuń wszystko</button>
     </div>
+  </div>
+</div>
+
+<!-- SEND MESSAGE MODAL -->
+<div class="modal-overlay" id="modal-send-msg">
+  <div class="msg-modal-box">
+    <button class="msg-close-btn" onclick="closeMsgModal()">✕</button>
+    <h3>📩 Wyślij wiadomość</h3>
+    <div class="msg-modal-subtitle">Do ucznia / klasy z fatalnym samopoczuciem</div>
+
+    <div class="msg-recipient-info">
+      <div class="label">ODBIORCA (klasa / kod ucznia)</div>
+      <div class="value" id="msg-recipient-display">—</div>
+    </div>
+
+    <div class="msg-templates">
+      <div class="msg-templates-label">SZYBKIE SZABLONY:</div>
+      <span class="msg-template-btn" onclick="useTemplate(0)">💙 Wsparcie</span>
+      <span class="msg-template-btn" onclick="useTemplate(1)">📅 Zaproszenie na rozmowę</span>
+      <span class="msg-template-btn" onclick="useTemplate(2)">🆘 Pilna pomoc</span>
+      <span class="msg-template-btn" onclick="useTemplate(3)">📞 Kontakt do pedagoga</span>
+    </div>
+
+    <textarea class="msg-textarea" id="msg-text" placeholder="Wpisz wiadomość do ucznia..."></textarea>
+
+    <button class="msg-send-btn" onclick="sendMessage()" id="msg-send-btn">📤 Wyślij wiadomość</button>
+
+    <div id="msg-success-box" style="display:none;">
+      <div class="msg-success">
+        <div class="msg-success-icon">✅</div>
+        Wiadomość wysłana! Uczeń zobaczy ją po zalogowaniu kodem.
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-    let myChart;
-    let rawVotes = [];
-    let activeFilter = 'all';
+let myChart;
+let rawVotes = [];
+let activeFilter = 'all';
+let currentMsgTarget = null; // { kto, kod }
 
-    async function updateData() {
-        try {
-            const res = await fetch('/api/get_stats?details=true');
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({}));
-                showAlert('Błąd API: ' + (err.error || res.status));
-                return;
-            }
-            const data = await res.json();
-            if (data.error) { showAlert('Błąd bazy: ' + data.error); return; }
-            hideAlert();
+const MSG_TEMPLATES = [
+  `Cześć! Zauważyliśmy, że ostatnio czujesz się gorzej. Chcemy, żebyś wiedział/a, że nie jesteś sam/a. Jeśli chcesz porozmawiać, możesz do nas przyjść w każdej chwili. Dbamy o Ciebie. 💙`,
+  `Hej! Chciałbym/chciałabym zaprosić Cię na krótką rozmowę w gabinecie pedagoga. Możemy omówić, co teraz przeżywasz i razem znaleźć sposób, by poczuć się lepiej. Daj znać, kiedy możesz wpaść.`,
+  `Twoje odpowiedzi w ankiecie niepokoją nas. Bardzo prosimy, żebyś jak najszybciej zgłosił/a się do pedagoga szkolnego lub wychowawcy. Jesteśmy tu dla Ciebie i chcemy pomóc.`,
+  `Pamiętaj, że możesz skontaktować się z naszym pedagogiem szkolnym. Pedagog jest dostępny w pokoju 📍 nr ___ w godzinach ___–___. Możesz też napisać na adres: ___. Nie musisz przez to przechodzić sam/a.`
+];
 
-            rawVotes = data.raw_votes || [];
-
-            const d = data.dobrze   || 0;
-            const z = data.zle      || 0;
-            const f = data.fatalnie || 0;
-            const total = d + z + f;
-
-            animateCount('kpi-total', total);
-            animateCount('kpi-good',  d);
-            animateCount('kpi-bad',   z);
-            animateCount('kpi-fatal', f);
-            document.getElementById('chart-total').innerText = total;
-
-            if (total > 0) {
-                document.getElementById('kpi-good-pct').innerText  = pct(d,total) + '% ogółu';
-                document.getElementById('kpi-bad-pct').innerText   = pct(z,total) + '% ogółu';
-                document.getElementById('kpi-fatal-pct').innerText = pct(f,total) + '% ogółu';
-            }
-
-            document.getElementById('leg-good').innerText  = d;
-            document.getElementById('leg-bad').innerText   = z;
-            document.getElementById('leg-fatal').innerText = f;
-            document.getElementById('last-update').innerText = 'Ostatnia aktualizacja: ' + new Date().toLocaleTimeString('pl-PL');
-
-            drawChart(d, z, f);
-            renderTable();
-            renderReasons();
-        } catch (e) {
-            showAlert('Błąd połączenia: ' + e.message);
-        }
+async function updateData() {
+  try {
+    const res = await fetch('/api/get_stats?details=true');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      showAlert('Błąd API: ' + (err.error || res.status));
+      return;
     }
+    const data = await res.json();
+    if (data.error) { showAlert('Błąd bazy: ' + data.error); return; }
+    hideAlert();
 
-    function drawChart(d, z, f) {
-        const ctx = document.getElementById('chart').getContext('2d');
-        if (myChart) { myChart.data.datasets[0].data = [d,z,f]; myChart.update('active'); return; }
-        myChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Dobrze','Źle','Fatalnie'],
-                datasets: [{ data:[d,z,f], backgroundColor:['#22c55e','#f59e0b','#ef4444'], borderColor:'#111111', borderWidth:3, hoverOffset:12, hoverBorderWidth:0 }]
-            },
-            options: {
-                cutout: '72%',
-                animation: { duration:900, easing:'easeInOutQuart' },
-                plugins: {
-                    legend: { display:false },
-                    tooltip: { backgroundColor:'#1a1a1a', borderColor:'#333', borderWidth:1, titleFont:{family:'DM Mono',size:11}, bodyFont:{family:'DM Sans',size:13}, padding:10, callbacks:{ label: ctx => ` ${ctx.label}: ${ctx.raw} głosów` } }
-                },
-                onClick: (e, el) => { if(el.length>0){ const l=['dobrze','zle','fatalnie']; setFilter(l[el[0].index]); } }
-            }
-        });
+    rawVotes = data.raw_votes || [];
+    const d = data.dobrze || 0;
+    const z = data.zle || 0;
+    const f = data.fatalnie || 0;
+    const total = d + z + f;
+
+    animateCount('kpi-total', total);
+    animateCount('kpi-good', d);
+    animateCount('kpi-bad', z);
+    animateCount('kpi-fatal', f);
+
+    document.getElementById('chart-total').innerText = total;
+    if (total > 0) {
+      document.getElementById('kpi-good-pct').innerText = pct(d,total) + '% ogółu';
+      document.getElementById('kpi-bad-pct').innerText = pct(z,total) + '% ogółu';
+      document.getElementById('kpi-fatal-pct').innerText = pct(f,total) + '% ogółu';
     }
+    document.getElementById('leg-good').innerText = d;
+    document.getElementById('leg-bad').innerText = z;
+    document.getElementById('leg-fatal').innerText = f;
+    document.getElementById('last-update').innerText = 'Ostatnia aktualizacja: ' + new Date().toLocaleTimeString('pl-PL');
 
-    function setFilter(mood) {
-        activeFilter = mood;
-        const cls = {all:'active-all',dobrze:'active-good',zle:'active-bad',fatalnie:'active-fatal'};
-        ['all','dobrze','zle','fatalnie'].forEach(m => {
-            const p = document.getElementById('pill-'+m);
-            p.className = 'filter-pill';
-            if(m===mood) p.classList.add(cls[m]);
-        });
-        document.querySelectorAll('.legend-item').forEach(li => li.classList.toggle('active', li.dataset.mood===mood));
-        renderTable();
+    drawChart(d, z, f);
+    renderTable();
+    renderReasons();
+  } catch (e) {
+    showAlert('Błąd połączenia: ' + e.message);
+  }
+}
+
+function drawChart(d, z, f) {
+  const ctx = document.getElementById('chart').getContext('2d');
+  if (myChart) { myChart.data.datasets[0].data = [d,z,f]; myChart.update('active'); return; }
+  myChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Dobrze','Źle','Fatalnie'],
+      datasets: [{ data:[d,z,f], backgroundColor:['#22c55e','#f59e0b','#ef4444'], borderColor:'#111111', borderWidth:3, hoverOffset:12, hoverBorderWidth:0 }]
+    },
+    options: {
+      cutout: '72%',
+      animation: { duration:900, easing:'easeInOutQuart' },
+      plugins: {
+        legend: { display:false },
+        tooltip: { backgroundColor:'#1a1a1a', borderColor:'#333', borderWidth:1, titleFont:{family:'DM Mono',size:11}, bodyFont:{family:'DM Sans',size:13}, padding:10, callbacks:{ label: ctx => ` ${ctx.label}: ${ctx.raw} głosów` } }
+      },
+      onClick: (e, el) => { if(el.length>0){ const l=['dobrze','zle','fatalnie']; setFilter(l[el[0].index]); } }
     }
+  });
+}
 
-    function renderTable() {
-        const tbody  = document.getElementById('votes-tbody');
-        const search = document.getElementById('search-input').value.toLowerCase();
-        const sort   = document.getElementById('sort-select').value;
+function setFilter(mood) {
+  activeFilter = mood;
+  const cls = {all:'active-all',dobrze:'active-good',zle:'active-bad',fatalnie:'active-fatal'};
+  ['all','dobrze','zle','fatalnie'].forEach(m => {
+    const p = document.getElementById('pill-'+m);
+    p.className = 'filter-pill';
+    if(m===mood) p.classList.add(cls[m]);
+  });
+  document.querySelectorAll('.legend-item').forEach(li => li.classList.toggle('active', li.dataset.mood===mood));
+  renderTable();
+}
 
-        let votes = [...rawVotes];
-        if (activeFilter !== 'all') votes = votes.filter(v => v.nastroj === activeFilter);
-        if (search) votes = votes.filter(v => (v.kto||'').toLowerCase().includes(search) || (v.powod||'').toLowerCase().includes(search));
+// Check if a person has multiple consecutive "fatalnie" votes
+function getFatalStreakCount(kto) {
+  const userVotes = rawVotes
+    .filter(v => v.kto === kto)
+    .sort((a, b) => new Date(b.kiedy) - new Date(a.kiedy));
 
-        if      (sort==='newest') votes.sort((a,b)=>new Date(b.kiedy)-new Date(a.kiedy));
-        else if (sort==='oldest') votes.sort((a,b)=>new Date(a.kiedy)-new Date(b.kiedy));
-        else if (sort==='class')  votes.sort((a,b)=>(a.kto||'').localeCompare(b.kto||''));
+  let streak = 0;
+  for (const v of userVotes) {
+    if (v.nastroj === 'fatalnie') streak++;
+    else break;
+  }
+  return streak;
+}
 
-        document.getElementById('result-count').innerText = votes.length + ' wyników';
+function renderTable() {
+  const tbody = document.getElementById('votes-tbody');
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const sort = document.getElementById('sort-select').value;
 
-        if (votes.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">🔍</div><p>Brak wyników dla wybranych filtrów</p></div></td></tr>`;
-            return;
-        }
+  let votes = [...rawVotes];
+  if (activeFilter !== 'all') votes = votes.filter(v => v.nastroj === activeFilter);
+  if (search) votes = votes.filter(v => (v.kto||'').toLowerCase().includes(search) || (v.powod||'').toLowerCase().includes(search));
+  if (sort==='newest') votes.sort((a,b)=>new Date(b.kiedy)-new Date(a.kiedy));
+  else if (sort==='oldest') votes.sort((a,b)=>new Date(a.kiedy)-new Date(b.kiedy));
+  else if (sort==='class') votes.sort((a,b)=>(a.kto||'').localeCompare(b.kto||''));
 
-        const ml = {dobrze:'dobrze',zle:'źle',fatalnie:'fatalnie'};
-        tbody.innerHTML = votes.map((v,i)=>{
-            const ok = v.powod && v.powod!=='null' && v.powod!=='undefined' && v.powod.trim()!=='';
-            return `<tr style="animation:rowIn 0.2s ${Math.min(i*0.025,0.4)}s ease both">
-                <td><span class="td-class">${escapeHtml(v.kto||'—')}</span></td>
-                <td><span class="mood-badge ${v.nastroj}">${ml[v.nastroj]||v.nastroj}</span></td>
-                <td>${ok ? `<span class="td-reason">${escapeHtml(v.powod)}</span>` : `<span class="td-reason no-reason">brak opisu</span>`}</td>
-                <td><span class="td-time">${formatDate(v.kiedy)}</span></td>
-            </tr>`;
-        }).join('');
+  document.getElementById('result-count').innerText = votes.length + ' wyników';
+
+  if (votes.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🔍</div><p>Brak wyników dla wybranych filtrów</p></div></td></tr>`;
+    return;
+  }
+
+  const ml = {dobrze:'dobrze',zle:'źle',fatalnie:'fatalnie'};
+  tbody.innerHTML = votes.map((v,i) => {
+    const ok = v.powod && v.powod!=='null' && v.powod!=='undefined' && v.powod.trim()!=='';
+    const isFatal = v.nastroj === 'fatalnie';
+    const streak = isFatal ? getFatalStreakCount(v.kto) : 0;
+    const streakBadge = streak >= 2
+      ? `<span class="fatal-alert-badge">⚠ ${streak}× z rzędu</span>`
+      : '';
+
+    // Action button - show for fatal or high streak
+    const actionBtn = (isFatal || streak >= 2)
+      ? `<button class="btn-send-msg" onclick="openMsgModal(${JSON.stringify(escapeHtml(v.kto||'?'))}, ${JSON.stringify(v.kod||'')})">✉ Wyślij</button>`
+      : `<span style="color:#333;font-size:0.75rem;font-family:'DM Mono',monospace;">—</span>`;
+
+    return `<tr style="animation:rowIn 0.2s ${Math.min(i*0.025,0.4)}s ease both">
+      <td><span class="td-class">${escapeHtml(v.kto||'—')}</span>${streakBadge}</td>
+      <td><span class="mood-badge ${v.nastroj}">${ml[v.nastroj]||v.nastroj}</span></td>
+      <td>${ok ? `<span class="td-reason">${escapeHtml(v.powod)}</span>` : `<span class="td-reason no-reason">brak opisu</span>`}</td>
+      <td><span class="td-time">${formatDate(v.kiedy)}</span></td>
+      <td>${actionBtn}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderReasons() {
+  const container = document.getElementById('reasons-body');
+  const negative = rawVotes.filter(v => v.nastroj!=='dobrze' && v.powod && v.powod!=='null' && v.powod.trim()!=='');
+  const counts = {};
+  negative.forEach(v => {
+    const reason = v.powod.split('|')[0].trim();
+    if(reason) counts[reason] = (counts[reason]||0) + 1;
+  });
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  if(sorted.length===0){ container.innerHTML='<p style="color:var(--muted);font-size:0.85rem;font-family:\'DM Mono\',monospace;">Brak danych o powodach</p>'; return; }
+  const max = sorted[0][1];
+  container.innerHTML = sorted.map(([name,count])=>`
+    <div class="reason-bar-item">
+      <div class="reason-bar-top">
+        <span class="reason-bar-name">${escapeHtml(name)}</span>
+        <span class="reason-bar-count">${count} głosów</span>
+      </div>
+      <div class="reason-bar-track">
+        <div class="reason-bar-fill" style="width:${Math.round((count/max)*100)}%"></div>
+      </div>
+    </div>`).join('');
+}
+
+// ===== SEND MESSAGE LOGIC =====
+function openMsgModal(kto, kod) {
+  currentMsgTarget = { kto, kod };
+  document.getElementById('msg-recipient-display').textContent = kto || '(brak identyfikatora)';
+  document.getElementById('msg-text').value = '';
+  document.getElementById('msg-success-box').style.display = 'none';
+  document.getElementById('msg-send-btn').style.display = 'block';
+  document.getElementById('msg-send-btn').disabled = false;
+  document.getElementById('modal-send-msg').classList.add('show');
+}
+
+function closeMsgModal() {
+  document.getElementById('modal-send-msg').classList.remove('show');
+  currentMsgTarget = null;
+}
+
+function useTemplate(idx) {
+  document.getElementById('msg-text').value = MSG_TEMPLATES[idx];
+  document.getElementById('msg-text').focus();
+}
+
+async function sendMessage() {
+  const text = document.getElementById('msg-text').value.trim();
+  if (!text) { alert('Wpisz treść wiadomości.'); return; }
+  if (!currentMsgTarget) return;
+
+  const btn = document.getElementById('msg-send-btn');
+  btn.disabled = true;
+  btn.textContent = 'Wysyłanie...';
+
+  try {
+    const res = await fetch('/api/send_message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        kod_odbiorcy: currentMsgTarget.kod,
+        klasa_odbiorcy: currentMsgTarget.kto,
+        tresc: text,
+        od: 'Pedagog/Wychowawca'
+      })
+    });
+
+    if (res.ok) {
+      document.getElementById('msg-send-btn').style.display = 'none';
+      document.getElementById('msg-success-box').style.display = 'block';
+      setTimeout(closeMsgModal, 2500);
+    } else {
+      const err = await res.json().catch(() => ({}));
+      alert('Błąd: ' + (err.error || 'Nie udało się wysłać wiadomości.'));
+      btn.disabled = false;
+      btn.textContent = '📤 Wyślij wiadomość';
     }
+  } catch(e) {
+    alert('Błąd połączenia: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = '📤 Wyślij wiadomość';
+  }
+}
 
-    function renderReasons() {
-        const container = document.getElementById('reasons-body');
-        const negative = rawVotes.filter(v => v.nastroj!=='dobrze' && v.powod && v.powod!=='null' && v.powod.trim()!=='');
-        const counts = {};
-        negative.forEach(v => {
-            const reason = v.powod.split('|')[0].trim();
-            if(reason) counts[reason] = (counts[reason]||0) + 1;
-        });
-        const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-        if(sorted.length===0){ container.innerHTML='<p style="color:var(--muted);font-size:0.85rem;font-family:\'DM Mono\',monospace;">Brak danych o powodach</p>'; return; }
-        const max = sorted[0][1];
-        container.innerHTML = sorted.map(([name,count])=>`
-            <div class="reason-bar-item">
-                <div class="reason-bar-top">
-                    <span class="reason-bar-name">${escapeHtml(name)}</span>
-                    <span class="reason-bar-count">${count} głosów</span>
-                </div>
-                <div class="reason-bar-track">
-                    <div class="reason-bar-fill" style="width:${Math.round((count/max)*100)}%"></div>
-                </div>
-            </div>`).join('');
-    }
+function openResetModal() { document.getElementById('modal-reset').classList.add('show'); }
+function closeResetModal() { document.getElementById('modal-reset').classList.remove('show'); }
 
-    function openResetModal()  { document.getElementById('modal-reset').classList.add('show'); }
-    function closeResetModal() { document.getElementById('modal-reset').classList.remove('show'); }
+async function doReset() {
+  try {
+    const res = await fetch('/api/reset_stats', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({filter:'all'})
+    });
+    if(res.ok){ closeResetModal(); rawVotes=[]; renderTable(); renderReasons(); await updateData(); }
+    else { alert('Błąd przy resetowaniu danych.'); }
+  } catch(e){ alert('Błąd połączenia: '+e.message); }
+}
 
-    async function doReset() {
-        try {
-            const res = await fetch('/api/reset_stats', {
-                method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({filter:'all'})
-            });
-            if(res.ok){ closeResetModal(); rawVotes=[]; renderTable(); renderReasons(); await updateData(); }
-            else { alert('Błąd przy resetowaniu danych.'); }
-        } catch(e){ alert('Błąd połączenia: '+e.message); }
-    }
+function pct(val,total){ return total>0?Math.round((val/total)*100):0; }
 
-    function pct(val,total){ return total>0?Math.round((val/total)*100):0; }
+function formatDate(str) {
+  if(!str) return '—';
+  try {
+    const d = new Date(str);
+    if(isNaN(d)) return String(str);
+    return d.toLocaleDateString('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric'})
+      + ' ' + d.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'});
+  } catch { return String(str); }
+}
 
-    function formatDate(str) {
-        if(!str) return '—';
-        try {
-            const d = new Date(str);
-            if(isNaN(d)) return String(str);
-            return d.toLocaleDateString('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric'})
-                 + ' ' + d.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'});
-        } catch { return String(str); }
-    }
+function escapeHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
-    function escapeHtml(str) {
-        return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
+function animateCount(id, target) {
+  const el = document.getElementById(id);
+  const start = parseInt(el.innerText)||0;
+  const t0 = performance.now(), dur = 600;
+  (function step(now){
+    const p = Math.min((now-t0)/dur,1), e = 1-Math.pow(1-p,3);
+    el.innerText = Math.round(start+(target-start)*e);
+    if(p<1) requestAnimationFrame(step);
+  })(t0);
+}
 
-    function animateCount(id, target) {
-        const el = document.getElementById(id);
-        const start = parseInt(el.innerText)||0;
-        const t0 = performance.now(), dur = 600;
-        (function step(now){
-            const p = Math.min((now-t0)/dur,1), e = 1-Math.pow(1-p,3);
-            el.innerText = Math.round(start+(target-start)*e);
-            if(p<1) requestAnimationFrame(step);
-        })(t0);
-    }
+function showAlert(msg){ const e=document.getElementById('db-alert'); e.innerText='⚠ '+msg; e.classList.add('show'); }
+function hideAlert(){ document.getElementById('db-alert').classList.remove('show'); }
 
-    function showAlert(msg){ const e=document.getElementById('db-alert'); e.innerText='⚠ '+msg; e.classList.add('show'); }
-    function hideAlert(){ document.getElementById('db-alert').classList.remove('show'); }
+document.getElementById('modal-reset').addEventListener('click', function(e){ if(e.target===this) closeResetModal(); });
+document.getElementById('modal-send-msg').addEventListener('click', function(e){ if(e.target===this) closeMsgModal(); });
 
-    document.getElementById('modal-reset').addEventListener('click', function(e){ if(e.target===this) closeResetModal(); });
-
-    updateData();
-    setInterval(updateData, 30000);
+updateData();
+setInterval(updateData, 30000);
 </script>
 </body>
 </html>
