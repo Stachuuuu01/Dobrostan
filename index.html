@@ -609,6 +609,27 @@ function formatMsgDate(str) {
   } catch { return str; }
 }
 
+// Ta funkcja powinna zostać wywołana po tym, jak uczeń poda swój kod
+async function checkPrivateMessages(userCode) {
+    try {
+        const response = await fetch(`/api/get_user_messages?code=${userCode}`);
+        const messages = await response.json();
+
+        const msgContainer = document.getElementById('private-messages-display');
+        if (messages.length > 0) {
+            msgContainer.innerHTML = messages.map(m => `
+                <div class="message-card" style="border-left: 4px solid #6060ff; background: #1a1a2e; padding: 15px; margin: 10px 0; border-radius: 8px;">
+                    <small style="color: #888;">Wiadomość od: ${m.od} (${m.kiedy})</small>
+                    <p style="margin-top: 10px; color: #fff; line-height: 1.4;">${m.tresc}</p>
+                </div>
+            `).join('');
+            msgContainer.style.display = 'block';
+        }
+    } catch (err) {
+        console.error("Błąd pobierania wiadomości:", err);
+    }
+}
+
 function escapeHtml(str) {
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
