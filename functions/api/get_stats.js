@@ -68,7 +68,9 @@ export async function onRequestGet(context) {
       headers: { "Content-Type": "application/json" }
     });
 
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
-  }
+   // Fragment w bloku catch
+} catch (error) {
+  res.setHeader('Content-Type', 'application/json');
+  return res.status(500).json({ error: "Internal Server Error" });
+}
 }
