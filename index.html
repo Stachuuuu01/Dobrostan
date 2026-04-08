@@ -13,9 +13,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 .logo-img:hover { transform: scale(1.05); }
 .card { background: var(--card-bg); padding: 40px; border-radius: 25px; width: 95%; max-width: 900px; text-align: center; margin-top: 30px; border: 1px solid #333; box-shadow: 0 15px 40px rgba(0,0,0,0.7); position: relative; }
 .btn-wybor { padding: 18px 28px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 6px 12px rgba(0,0,0,0.4); margin: 5px; }
-.btn-wybor:hover:not(:disabled) { transform: translateY(-8px); filter: brightness(1.2); box-shadow: 0 12px 25px rgba(220, 53, 69, 0.4); }
-.btn-wybor:disabled { opacity: 0.55; cursor: not-allowed; transform: none !important; filter: none !important; box-shadow: none !important; }
-.quote-box { font-weight: bold; font-size: 1.6rem; margin: 25px 0; background: linear-gradient(270deg, #ff7e5f, #feb47b, #86e3ce, #d0e6a5, #ffdd94, #ff7e5f); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientMove 8s ease infinite; }
+.btn-wybor:hover { transform: translateY(-8px); filter: brightness(1.2); box-shadow: 0 12px 25px rgba(220, 53, 69, 0.4); }
+.quote-box { font-weight: bold; font-size: 1.6rem; margin: 25px 0; background: linear-gradient(270deg, #ff7e5f, #feb47b, #86e3ce, #d0e6a5, #ffdd94, #ff7e5f); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientMove 8s ease infinite; text-shadow: 0 2px 10px rgba(255,255,255,0.1); }
 @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 30px; }
 .modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); display:none; justify-content:center; align-items:center; z-index:999; backdrop-filter: blur(5px); }
@@ -25,71 +24,60 @@ input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 15px
 footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-align: center; letter-spacing: 1px; }
 .reason-stack { display: flex; flex-direction: column; gap: 10px; max-width: 500px; margin: 20px auto; }
 .btn-reason { text-align: left; padding: 15px 20px; background: #222; border: 1px solid #444; color: white; border-radius: 10px; cursor: pointer; transition: 0.3s; font-size: 1rem; }
-.btn-reason:hover:not(:disabled) { background: var(--primary); border-color: var(--primary); transform: translateX(10px); }
-.btn-reason:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+.btn-reason:hover { background: var(--primary); border-color: var(--primary); transform: translateX(10px); }
 #extra-desc-box { margin-top: 25px; padding-top: 20px; border-top: 1px solid #333; }
-
-/* Przyciski nastroju ze spinnerem */
-.btn-mood {
-  padding: 0; height: 150px; width: 180px;
-  border: none; border-radius: 12px; cursor: pointer;
-  font-weight: bold; font-size: 1.4rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.4); margin: 5px; color: white;
-  display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-  position: relative; overflow: hidden;
-}
-.btn-mood:hover:not(:disabled) { transform: translateY(-8px); filter: brightness(1.2); box-shadow: 0 12px 25px rgba(0,0,0,0.5); }
-.btn-mood:disabled { opacity: 0.55; cursor: not-allowed; transform: none !important; filter: none !important; }
-.btn-mood .spinner {
-  display: none; width: 28px; height: 28px;
-  border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff;
-  border-radius: 50%; animation: spin 0.7s linear infinite; position: absolute;
-}
-.btn-mood.loading .spinner { display: block; }
-.btn-mood.loading .mood-label { opacity: 0; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-#vote-status { margin-top: 18px; font-size: 0.95rem; min-height: 24px; color: #aaa; transition: 0.3s; }
-#vote-status.sending { color: #f59e0b; }
-#vote-status.ok { color: #22c55e; }
-#vote-status.err { color: var(--primary); }
 
 /* Inbox button */
 .btn-inbox {
-  position: relative; padding: 10px 20px; background: #1a1a2e; color: #a0a8ff;
-  border: 1px solid #3a3a6a; border-radius: 12px; cursor: pointer; font-weight: bold;
-  font-size: 1rem; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; margin: 5px;
+  position: relative;
+  padding: 10px 20px;
+  background: #1a1a2e;
+  color: #a0a8ff;
+  border: 1px solid #3a3a6a;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 5px;
 }
 .btn-inbox:hover { background: #22224a; border-color: #6060cc; color: #c0c8ff; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(80,80,200,0.3); }
-.inbox-icon { font-size: 1.2rem; position: relative; display: inline-block; }
-.inbox-dot {
-  position: absolute; top: -4px; right: -5px;
-  width: 9px; height: 9px; background: #ef4444; border-radius: 50%;
-  border: 2px solid #1a1a2e; display: none;
-  animation: pulse-dot 2s ease-in-out infinite;
-}
-.inbox-dot.visible { display: block; }
-@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.8)} }
+.inbox-icon { font-size: 1.2rem; }
 
-/* Inbox modal */
+/* Inbox modal styles */
 .inbox-modal-inner {
-  background: #111; border: 1px solid #333; border-radius: 20px; padding: 36px 32px;
-  width: 95%; max-width: 460px; max-height: 85vh; overflow-y: auto; position: relative;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 20px;
+  padding: 36px 32px;
+  width: 95%;
+  max-width: 460px;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
 }
 .inbox-modal-inner h2 { margin-bottom: 6px; color: #a0a8ff; }
-.inbox-intro { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
+.inbox-modal-inner p { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
 .inbox-code-area { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
 .inbox-code-area input { width: 200px; margin: 0; text-align: center; }
 .btn-inbox-login { padding: 13px 22px; background: #3333aa; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: 0.3s; white-space: nowrap; }
-.btn-inbox-login:hover:not(:disabled) { background: #4444cc; }
-.btn-inbox-login:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-inbox-login:hover { background: #4444cc; }
 #inbox-messages-area { margin-top: 24px; text-align: left; }
 #inbox-messages-area h3 { color: #a0a8ff; margin-bottom: 14px; font-size: 1rem; border-bottom: 1px solid #222; padding-bottom: 8px; }
-.inbox-msg { background: #1c1c2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
+.inbox-msg {
+  background: #1c1c2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  position: relative;
+}
 .inbox-msg.unread { border-left: 3px solid #6060ff; }
 .inbox-msg-from { font-size: 0.75rem; color: #666; margin-bottom: 6px; font-family: monospace; }
-.inbox-msg-text { font-size: 0.95rem; color: #ddd; line-height: 1.5; white-space: pre-wrap; }
+.inbox-msg-text { font-size: 0.95rem; color: #ddd; line-height: 1.5; }
 .inbox-msg-time { font-size: 0.72rem; color: #444; margin-top: 8px; text-align: right; }
 .inbox-empty { text-align: center; color: #444; padding: 30px 0; font-size: 0.9rem; }
 .inbox-empty-icon { font-size: 2rem; margin-bottom: 10px; }
@@ -98,28 +86,21 @@ footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-
 </style>
 </head>
 <body>
-
 <div class="header">
   <img src="logo.png" class="logo-img" onclick="location.reload()">
   <div>
     <button id="btn-visit" onclick="window.location.href='wizyta.html'" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Chcesz z kimś porozmawiać? Umów wizytę, lub sprawdź terminy.</button>
     <button id="btn-teacher" onclick="prepareLogin('Nauczyciele')" class="btn-wybor" style="background:var(--teacher); padding: 10px 20px;">Ankieta dla nauczyciela</button>
-
-    <button class="btn-inbox" id="btn-inbox" onclick="openInboxModal()" title="Sprawdź wiadomości">
-      <span class="inbox-icon">
-        📬
-        <span class="inbox-dot" id="inbox-dot"></span>
-      </span>
-      Wiadomości
+    <!-- INBOX BUTTON -->
+    <button class="btn-inbox" onclick="document.getElementById('modal-inbox').style.display='flex'" title="Sprawdź wiadomości">
+      <span class="inbox-icon">📬</span> Wiadomości
     </button>
-
     <button id="btn-admin" onclick="document.getElementById('modal-admin').style.display='flex'" class="btn-wybor" style="margin-left:12px; padding: 10px 20px;">Admin</button>
     <button id="btn-logout" onclick="location.reload()" class="btn-wybor hidden" style="background:#444; padding: 10px 20px;">Wyloguj</button>
   </div>
 </div>
 
 <div id="sekcja-glowna" class="card">
-
   <div id="step-rocznik">
     <h1 style="color: var(--primary); font-size: 2.5rem; margin-bottom: 30px;">Dobrostan</h1>
     <p style="color: #aaa; margin-bottom: 30px;">Wybierz swój rocznik, aby kontynuować</p>
@@ -147,57 +128,43 @@ footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-
   <div id="step-login" class="hidden">
     <h2 id="login-title" style="margin-bottom:10px;">Logowanie Kodem</h2>
     <div id="teacher-quote" class="quote-box hidden">„Dobrostan nauczyciela to dobrostan ucznia"</div>
-    <input type="password" id="user_code" placeholder="Wprowadź swój unikalny kod..." autocomplete="off"
-      onkeydown="if(event.key==='Enter') handleLogin()">
-    <button id="btn-login-submit" onclick="handleLogin()" class="btn-wybor" style="display:block; margin: 20px auto; width: 60%;">Zaloguj się</button>
-    <div id="login-status" style="min-height:22px; font-size:0.9rem; margin-top:4px;"></div>
-    <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:8px;">Cofnij</button>
+    <input type="password" id="user_code" placeholder="Wprowadź swój unikalny kod..." autocomplete="off">
+    <button onclick="handleLogin()" class="btn-wybor" style="display:block; margin: 20px auto; width: 60%;">Zaloguj się</button>
+    <button onclick="showStep('step-rocznik')" style="background:none; border:none; color:gray; cursor:pointer;">Cofnij</button>
   </div>
 
   <div id="step-vote" class="hidden">
     <h2 style="margin-bottom:10px;">Głosujesz jako: <span id="display-identity" style="color:var(--primary)"></span></h2>
     <p style="color: #888; margin-bottom: 40px;">Jak się dzisiaj czujesz w szkole?</p>
     <div style="display:flex; justify-content:center; gap:25px; margin-top:10px; flex-wrap:wrap;">
-      <button class="btn-mood" id="mood-dobrze" style="background:#28a745;" onclick="handleMoodSelection('dobrze')">
-        <span class="mood-label">Dobrze 😊</span>
-        <div class="spinner"></div>
-      </button>
-      <button class="btn-mood" id="mood-zle" style="background:var(--warning); color:black;" onclick="handleMoodSelection('zle')">
-        <span class="mood-label">Źle 😐</span>
-        <div class="spinner"></div>
-      </button>
-      <button class="btn-mood" id="mood-fatalnie" style="background:var(--primary);" onclick="handleMoodSelection('fatalnie')">
-        <span class="mood-label">Fatalnie 😖</span>
-        <div class="spinner"></div>
-      </button>
+      <button onclick="handleMoodSelection('dobrze')" class="btn-wybor" style="background:var(--success); height:150px; width:180px; font-size:1.4rem;">Dobrze 😊</button>
+      <button onclick="handleMoodSelection('zle')" class="btn-wybor" style="background:var(--warning); color:black; height:150px; width:180px; font-size:1.4rem;">Źle 😐</button>
+      <button onclick="handleMoodSelection('fatalnie')" class="btn-wybor" style="background:var(--primary); height:150px; width:180px; font-size:1.4rem;">Fatalnie 😖</button>
     </div>
-    <div id="vote-status"></div>
   </div>
 
   <div id="step-reason" class="hidden">
     <h2 id="reason-header" style="margin-bottom:10px; color:var(--warning);">Co wpływa na Twój gorszy nastrój?</h2>
     <p style="color: #888; margin-bottom: 20px;">Wybierz główną przyczynę:</p>
     <div class="reason-stack">
-      <button class="btn-reason" onclick="sendVote('Zmiany hormonalne i dojrzewanie', this)">Zmiany hormonalne i dojrzewanie</button>
-      <button class="btn-reason" onclick="sendVote('Presja szkolna', this)">Presja szkolna</button>
-      <button class="btn-reason" onclick="sendVote('Media społecznościowe', this)">Media społecznościowe</button>
-      <button class="btn-reason" onclick="sendVote('Problemy rówieśnicze', this)">Problemy rówieśnicze</button>
-      <button class="btn-reason" onclick="sendVote('Trudności w domu', this)">Trudności w domu</button>
-      <button class="btn-reason" onclick="sendVote('Niedobór snu i styl życia', this)">Niedobór snu i styl życia</button>
-      <button class="btn-reason" onclick="sendVote('Problemy emocjonalne i zdrowotne', this)">Problemy emocjonalne i zdrowotne</button>
+      <button class="btn-reason" onclick="sendVote('Zmiany hormonalne i dojrzewanie')">Zmiany hormonalne i dojrzewanie</button>
+      <button class="btn-reason" onclick="sendVote('Presja szkolna')">Presja szkolna</button>
+      <button class="btn-reason" onclick="sendVote('Media społecznościowe')">Media społecznościowe</button>
+      <button class="btn-reason" onclick="sendVote('Problemy rówieśnicze')">Problemy rówieśnicze</button>
+      <button class="btn-reason" onclick="sendVote('Trudności w domu')">Trudności w domu</button>
+      <button class="btn-reason" onclick="sendVote('Niedobór snu i styl życia')">Niedobór snu i styl życia</button>
+      <button class="btn-reason" onclick="sendVote('Problemy emocjonalne i zdrowotne')">Problemy emocjonalne i zdrowotne</button>
     </div>
-    <div id="reason-status" style="min-height:22px; font-size:0.9rem; margin-top:8px; color:#aaa;"></div>
     <div id="extra-desc-box" class="hidden">
       <p style="color: #ccc; margin-bottom: 10px;">Czy chcesz rozwinąć swój problem?</p>
       <button id="btn-show-textarea" class="btn-wybor" style="background: #444; font-size: 0.9rem; padding: 10px 20px;" onclick="showTextArea()">Tak, chcę opisać</button>
       <div id="textarea-container" class="hidden">
         <textarea id="custom-reason-text" placeholder="Opisz krótko co się dzieje (opcjonalnie)..." rows="4"></textarea>
-        <button id="btn-send-custom" class="btn-wybor" style="display:block; margin: 10px auto; width: 60%;" onclick="sendVoteWithText()">Wyślij z opisem</button>
+        <button class="btn-wybor" style="display:block; margin: 10px auto; width: 60%;" onclick="sendVoteWithText()">Wyślij z opisem</button>
       </div>
     </div>
     <button onclick="showStep('step-vote')" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">← Wróć do nastroju</button>
   </div>
-
 </div>
 
 <!-- ADMIN MODAL -->
@@ -205,8 +172,8 @@ footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-
   <div class="card" style="max-width:380px;">
     <h2 style="margin-bottom:20px;">Panel Administratora</h2>
     <input type="text" id="admin_user" placeholder="Login">
-    <input type="password" id="admin_pass" placeholder="Hasło" onkeydown="if(event.key==='Enter') handleAdminLogin()">
-    <button id="btn-admin-submit" onclick="handleAdminLogin()" class="btn-wybor" style="width:100%; margin-top:15px;">Zaloguj</button>
+    <input type="password" id="admin_pass" placeholder="Hasło">
+    <button onclick="handleAdminLogin()" class="btn-wybor" style="width:100%; margin-top:15px;">Zaloguj</button>
     <button onclick="document.getElementById('modal-admin').style.display='none'" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">Anuluj</button>
   </div>
 </div>
@@ -214,19 +181,18 @@ footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-
 <!-- INBOX MODAL -->
 <div id="modal-inbox" class="modal">
   <div class="inbox-modal-inner">
-    <button class="btn-close-modal" onclick="closeInboxModal()">✕</button>
+    <button class="btn-close-modal" onclick="document.getElementById('modal-inbox').style.display='none'">✕</button>
     <h2>📬 Skrzynka odbiorcza</h2>
-    <p class="inbox-intro" id="inbox-intro-text">Wpisz swój kod dostępu, aby sprawdzić wiadomości od szkolnego psychologa / wychowawcy.</p>
-    <div class="inbox-code-area" id="inbox-code-area">
-      <input type="password" id="inbox_code" placeholder="Twój kod..." autocomplete="off"
-        onkeydown="if(event.key==='Enter') checkInbox()">
-      <button class="btn-inbox-login" id="btn-inbox-check" onclick="checkInbox()">Sprawdź</button>
+    <p>Wpisz swój kod dostępu, aby sprawdzić wiadomości od szkolnego psychologa / wychowawcy.</p>
+    <div class="inbox-code-area">
+      <input type="password" id="inbox_code" placeholder="Twój kod..." autocomplete="off" onkeydown="if(event.key==='Enter') checkInbox()">
+      <button class="btn-inbox-login" onclick="checkInbox()">Sprawdź</button>
     </div>
     <div id="inbox-messages-area" style="display:none;">
       <h3>📩 Twoje wiadomości</h3>
       <div id="inbox-list"></div>
     </div>
-    <div id="inbox-error" style="color:#ff6060; margin-top:14px; font-size:0.9rem; display:none;">Nieprawidłowy kod lub brak wiadomości dla tego kodu.</div>
+    <div id="inbox-error" style="color:#ff6060; margin-top:14px; font-size:0.9rem; display:none;">Nieprawidłowy kod lub brak wiadomości.</div>
   </div>
 </div>
 
@@ -236,51 +202,31 @@ footer { margin-top: auto; padding: 25px; color: #666; font-size: 0.95rem; text-
 </footer>
 
 <script>
-const CONFIG = {
-  '1':['TE','TG','TI','TM','TP','TS','BS','BK'],
-  '2':['TE','TI','TP','TS','BK','BS'],
-  '3':['TA','TE','TI','TM','TP','TS','BK','BS'],
-  '4':['TE','TG','TI','TM','TP','TS','TT'],
-  '5':['TE','TG','TI','TP','TS']
-};
-
+const CONFIG = {'1':['TE','TG','TI','TM','TP','TS' ,'BS','BK'],'2':['TE','TI','TP','TS','BK','BS'],'3':['TA','TE','TI','TM','TP','TS','BK','BS'],'4':['TE','TG','TI','TM','TP','TS','TT'],'5':['TE','TG','TI','TP','TS']};
 let currentTable = "";
 let selectedMood = "";
-let currentUserKod = "";   // kod zalogowanego ucznia
-let voteSending = false;   // blokada podwójnego kliknięcia
 
-// ===== NAWIGACJA =====
 function showStep(id) {
   document.querySelectorAll('#sekcja-glowna > div').forEach(div => div.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
 }
 
 function selectYear(y) {
-  const cont = document.getElementById('list-profile');
-  cont.innerHTML = '';
+  const cont = document.getElementById('list-profile'); cont.innerHTML = '';
   CONFIG[y].forEach(p => {
-    let b = document.createElement('button');
-    b.className = 'btn-wybor';
-    b.innerText = p;
-    b.onclick = () => {
-      if (['TG','TI','BS','BK','TT'].includes(p)) prepareLogin(y + p);
-      else selectGroup(y + p);
-    };
+    let b = document.createElement('button'); b.className = 'btn-wybor'; b.innerText = p;
+    b.onclick = () => { if(['TG','TI','BS','BK','TT'].includes(p)) prepareLogin(y+p); else selectGroup(y+p); };
     cont.appendChild(b);
   });
   showStep('step-profil');
 }
 
 function selectGroup(prefix) {
-  const cont = document.getElementById('list-grupy');
-  cont.innerHTML = '';
+  const cont = document.getElementById('list-grupy'); cont.innerHTML = '';
   const grp = prefix.includes('TM') ? ['_Automatyk','_Mechanik'] : ['G1','G2'];
   grp.forEach(g => {
-    let b = document.createElement('button');
-    b.className = 'btn-wybor';
-    b.innerText = g.replace('_','');
-    b.onclick = () => prepareLogin(prefix + g);
-    cont.appendChild(b);
+    let b = document.createElement('button'); b.className = 'btn-wybor'; b.innerText = g.replace('_','');
+    b.onclick = () => prepareLogin(prefix+g); cont.appendChild(b);
   });
   showStep('step-grupa');
 }
@@ -289,106 +235,42 @@ function prepareLogin(table) {
   currentTable = table;
   const quote = document.getElementById('teacher-quote');
   const title = document.getElementById('login-title');
-  if (table === 'Nauczyciele') {
-    quote.classList.remove('hidden');
-    title.innerText = "Ankieta Nauczyciela";
-  } else {
-    quote.classList.add('hidden');
-    title.innerText = "Klasa " + table;
-  }
-  document.getElementById('user_code').value = '';
-  document.getElementById('login-status').innerText = '';
+  if(table === 'Nauczyciele') { quote.classList.remove('hidden'); title.innerText = "Ankieta Nauczyciela"; }
+  else { quote.classList.add('hidden'); title.innerText = "Klasa " + table; }
   showStep('step-login');
 }
 
-// ===== LOGOWANIE =====
 async function handleLogin() {
-  const kod = document.getElementById('user_code').value.trim();
-  if (!kod) return;
-
-  const btn = document.getElementById('btn-login-submit');
-  const status = document.getElementById('login-status');
-  btn.disabled = true;
-  btn.innerText = 'Logowanie...';
-  status.innerText = '';
-
-  try {
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tabela: currentTable, kod })
-    });
-
-    if (res.ok) {
-      currentUserKod = kod;
-
-      document.getElementById('display-identity').innerText = currentTable;
-      document.getElementById('btn-teacher').classList.add('hidden');
-      document.getElementById('btn-admin').classList.add('hidden');
-      document.getElementById('btn-logout').classList.remove('hidden');
-      showStep('step-vote');
-
-      // Sprawdzamy wiadomości po zalogowaniu (po kodzie I klasie)
-      checkUnreadSilent(kod, currentTable);
-    } else {
-      status.innerText = '✗ Błędny kod!';
-      status.style.color = '#ef4444';
-      btn.disabled = false;
-      btn.innerText = 'Zaloguj się';
-    }
-  } catch(e) {
-    status.innerText = '✗ Błąd połączenia.';
-    status.style.color = '#ef4444';
-    btn.disabled = false;
-    btn.innerText = 'Zaloguj się';
-  }
+  const kod = document.getElementById('user_code').value;
+  const res = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tabela: currentTable, kod: kod })
+  });
+  if(res.ok) {
+    document.getElementById('display-identity').innerText = currentTable;
+    document.getElementById('btn-teacher').classList.add('hidden');
+    document.getElementById('btn-admin').classList.add('hidden');
+    document.getElementById('btn-logout').classList.remove('hidden');
+    showStep('step-vote');
+  } else { alert('Błędny kod!'); }
 }
 
-// ===== GŁOSOWANIE =====
 function handleMoodSelection(mood) {
-  if (voteSending) return;
   selectedMood = mood;
-
+  const descBox = document.getElementById('extra-desc-box');
   document.getElementById('textarea-container').classList.add('hidden');
   document.getElementById('btn-show-textarea').classList.remove('hidden');
-  document.getElementById('custom-reason-text').value = '';
-  document.getElementById('reason-status').innerText = '';
-  document.getElementById('extra-desc-box').classList.add('hidden');
-
+  document.getElementById('custom-reason-text').value = "";
   if (mood === 'zle') {
-    document.getElementById('extra-desc-box').classList.remove('hidden');
-    // Blokujemy przyciski nastroju zanim przejdziemy do powodów
-    // (nie ma sensu pokazywać spinnera, po prostu blokujemy)
-    lockMoodButtons(false);
+    descBox.classList.remove('hidden');
     showStep('step-reason');
+  } else if (mood === 'fatalnie') {
+    descBox.classList.add('hidden');
+    sendVote(null);
   } else {
-    sendVote(null, null);
+    sendVote(null);
   }
-}
-
-function lockMoodButtons(withSpinner) {
-  voteSending = true;
-  ['mood-dobrze','mood-zle','mood-fatalnie'].forEach(id => {
-    const b = document.getElementById(id);
-    b.disabled = true;
-    if (withSpinner && id === 'mood-' + selectedMood) b.classList.add('loading');
-  });
-  if (withSpinner) setVoteStatus('Wysyłanie...', 'sending');
-}
-
-function unlockMoodButtons() {
-  voteSending = false;
-  ['mood-dobrze','mood-zle','mood-fatalnie'].forEach(id => {
-    const b = document.getElementById(id);
-    b.disabled = false;
-    b.classList.remove('loading');
-  });
-}
-
-function setVoteStatus(msg, type) {
-  const el = document.getElementById('vote-status');
-  el.innerText = msg;
-  el.className = type || '';
 }
 
 function showTextArea() {
@@ -397,77 +279,33 @@ function showTextArea() {
 }
 
 function sendVoteWithText() {
-  const text = document.getElementById('custom-reason-text').value.trim();
-  if (!text) { alert("Proszę wpisz coś lub wybierz kategorię z listy powyżej."); return; }
-  sendVote("Opis własny: " + text, document.getElementById('btn-send-custom'));
+  const text = document.getElementById('custom-reason-text').value;
+  if(!text.trim()) { alert("Proszę wpisz coś lub wybierz kategorię z listy powyżej."); return; }
+  sendVote("Opis własny: " + text);
 }
 
-async function sendVote(reason, triggerEl) {
-  if (voteSending && !triggerEl) return; // dla nastroju blokujemy powtórne kliknięcie
-  // Dla powodów voteSending może być false przy wejściu tu z reason-step
-
-  const isReasonStep = (triggerEl !== null);
-
-  if (isReasonStep) {
-    if (voteSending) return; // blokada podwójnego kliknięcia w powodach
-    voteSending = true;
-    // Blokujemy wszystkie przyciski powodów
-    document.querySelectorAll('.btn-reason').forEach(b => b.disabled = true);
-    document.getElementById('btn-send-custom').disabled = true;
-    document.getElementById('reason-status').innerText = 'Wysyłanie...';
-    document.getElementById('reason-status').style.color = '#f59e0b';
-  } else {
-    lockMoodButtons(true);
-  }
-
+async function sendVote(reason) {
   try {
     const res = await fetch('/api/vote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nastroj: selectedMood, tabela: currentTable, powod: reason || null })
+      body: JSON.stringify({ nastroj: selectedMood, tabela: currentTable, powod: reason })
     });
-
-    if (res.ok) {
-      if (isReasonStep) {
-        document.getElementById('reason-status').innerText = '✓ Wysłano! Dziękujemy.';
-        document.getElementById('reason-status').style.color = '#22c55e';
-      } else {
-        setVoteStatus('✓ Dziękujemy za głos!', 'ok');
-      }
-
+    if(res.ok) {
       if (selectedMood === 'fatalnie') {
-        setTimeout(() => {
-          const help = confirm('Pamiętaj, że nie jesteś sam/a. Czy chcesz zobaczyć, gdzie szukać pomocy?');
-          if (help) window.open('https://twarzedepresji.pl/pomoc-dla-dzieci-i-mlodziezy/', '_blank');
-          setTimeout(() => location.reload(), 300);
-        }, 600);
+        const help = confirm('Dziękujemy za głos. Pamiętaj, że nie jesteś sam/a. Czy chcesz zobaczyć, gdzie szukać pomocy i wsparcia?');
+        if (help) { window.open('https://twarzedepresji.pl/pomoc-dla-dzieci-i-mlodziezy/', '_blank'); }
       } else {
-        setTimeout(() => location.reload(), 1200);
+        alert('Dziękujemy za głos!');
       }
-    } else {
-      throw new Error('server');
-    }
-  } catch(e) {
-    voteSending = false;
-    if (isReasonStep) {
-      document.getElementById('reason-status').innerText = '✗ Błąd. Spróbuj ponownie.';
-      document.getElementById('reason-status').style.color = '#ef4444';
-      document.querySelectorAll('.btn-reason').forEach(b => b.disabled = false);
-      document.getElementById('btn-send-custom').disabled = false;
-    } else {
-      setVoteStatus('✗ Błąd połączenia. Spróbuj ponownie.', 'err');
-      unlockMoodButtons();
-    }
-  }
+      setTimeout(() => { location.reload(); }, 300);
+    } else { alert('Błąd zapisu głosu.'); }
+  } catch (error) { alert('Błąd połączenia z serwerem.'); }
 }
 
-// ===== ADMIN =====
 async function handleAdminLogin() {
   const user = document.getElementById('admin_user').value;
   const pass = document.getElementById('admin_pass').value;
-  const btn = document.getElementById('btn-admin-submit');
-  btn.disabled = true;
-  btn.innerText = 'Logowanie...';
   try {
     const res = await fetch('/api/admin_login', {
       method: 'POST',
@@ -475,94 +313,32 @@ async function handleAdminLogin() {
       body: JSON.stringify({ user, pass })
     });
     const data = await res.json();
-    if (res.ok) {
-      window.location.href = '/stats.html';
-    } else {
-      alert('BŁĄD: ' + (data.error || "Nieznany błąd logowania"));
-      btn.disabled = false;
-      btn.innerText = 'Zaloguj';
-    }
-  } catch(e) {
-    alert("Błąd połączenia: " + e.message);
-    btn.disabled = false;
-    btn.innerText = 'Zaloguj';
-  }
+    if (res.ok) { window.location.href = '/stats.html'; }
+    else { alert('BŁĄD: ' + (data.error || "Nieznany błąd logowania")); }
+  } catch (e) { alert("Błąd połączenia: " + e.message); }
 }
 
-// ===== INBOX =====
-
-// Cicha kontrola nieprzeczytanych — pokazuje/chowa kropkę
-async function checkUnreadSilent(kod, klasa) {
-  try {
-    const body = {};
-    if (kod) body.kod = kod;
-    if (klasa) body.klasa = klasa;
-    const res = await fetch('/api/get_messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if (!res.ok) return;
-    const data = await res.json();
-    setInboxDot((data.unread || 0) > 0);
-  } catch(e) { /* cicho ignorujemy */ }
-}
-
-function setInboxDot(visible) {
-  const dot = document.getElementById('inbox-dot');
-  if (visible) dot.classList.add('visible');
-  else dot.classList.remove('visible');
-}
-
-function openInboxModal() {
-  document.getElementById('inbox-error').style.display = 'none';
-  document.getElementById('inbox-messages-area').style.display = 'none';
-
-  if (currentUserKod && currentTable) {
-    // Zalogowany — ukrywamy pole kodu, od razu ładujemy
-    document.getElementById('inbox-code-area').style.display = 'none';
-    document.getElementById('inbox-intro-text').innerText = 'Wiadomości dla Twojego konta:';
-    loadInboxMessages(currentUserKod, currentTable);
-  } else {
-    document.getElementById('inbox-code-area').style.display = 'flex';
-    document.getElementById('inbox-intro-text').innerText = 'Wpisz swój kod dostępu, aby sprawdzić wiadomości.';
-    document.getElementById('inbox_code').value = '';
-  }
-  document.getElementById('modal-inbox').style.display = 'flex';
-}
-
-function closeInboxModal() {
-  document.getElementById('modal-inbox').style.display = 'none';
-}
-
+// ===== INBOX LOGIC =====
 async function checkInbox() {
   const kod = document.getElementById('inbox_code').value.trim();
   if (!kod) return;
-  const btn = document.getElementById('btn-inbox-check');
-  btn.disabled = true;
-  btn.innerText = '...';
-  await loadInboxMessages(kod, null);
-  btn.disabled = false;
-  btn.innerText = 'Sprawdź';
-}
 
-async function loadInboxMessages(kod, klasa) {
   const errEl = document.getElementById('inbox-error');
   const areaEl = document.getElementById('inbox-messages-area');
   errEl.style.display = 'none';
+  areaEl.style.display = 'none';
 
   try {
-    const body = {};
-    if (kod) body.kod = kod;
-    if (klasa) body.klasa = klasa;
-
     const res = await fetch('/api/get_messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify({ kod })
     });
 
-    if (!res.ok) { errEl.style.display = 'block'; return; }
+    if (!res.ok) {
+      errEl.style.display = 'block';
+      return;
+    }
 
     const data = await res.json();
     const messages = data.messages || [];
@@ -571,7 +347,7 @@ async function loadInboxMessages(kod, klasa) {
       document.getElementById('inbox-list').innerHTML = `
         <div class="inbox-empty">
           <div class="inbox-empty-icon">📭</div>
-          <p>Brak wiadomości.</p>
+          <p>Brak nowych wiadomości.</p>
         </div>`;
     } else {
       document.getElementById('inbox-list').innerHTML = messages.map(msg => `
@@ -584,16 +360,12 @@ async function loadInboxMessages(kod, klasa) {
     }
 
     areaEl.style.display = 'block';
-    setInboxDot(false); // po otwarciu chowamy kropkę
 
-    // Oznacz jako przeczytane
-    const markBody = {};
-    if (kod) markBody.kod = kod;
-    if (klasa) markBody.klasa = klasa;
+    // Mark as read
     fetch('/api/mark_messages_read', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(markBody)
+      body: JSON.stringify({ kod })
     }).catch(() => {});
 
   } catch(e) {
@@ -609,33 +381,17 @@ function formatMsgDate(str) {
   } catch { return str; }
 }
 
-// Ta funkcja powinna zostać wywołana po tym, jak uczeń poda swój kod
-async function checkPrivateMessages(userCode) {
-    try {
-        const response = await fetch(`/api/get_user_messages?code=${userCode}`);
-        const messages = await response.json();
-
-        const msgContainer = document.getElementById('private-messages-display');
-        if (messages.length > 0) {
-            msgContainer.innerHTML = messages.map(m => `
-                <div class="message-card" style="border-left: 4px solid #6060ff; background: #1a1a2e; padding: 15px; margin: 10px 0; border-radius: 8px;">
-                    <small style="color: #888;">Wiadomość od: ${m.od} (${m.kiedy})</small>
-                    <p style="margin-top: 10px; color: #fff; line-height: 1.4;">${m.tresc}</p>
-                </div>
-            `).join('');
-            msgContainer.style.display = 'block';
-        }
-    } catch (err) {
-        console.error("Błąd pobierania wiadomości:", err);
-    }
-}
-
 function escapeHtml(str) {
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-document.getElementById('modal-inbox').addEventListener('click', function(e) { if (e.target === this) closeInboxModal(); });
-document.getElementById('modal-admin').addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
+// Close inbox modal on backdrop click
+document.getElementById('modal-inbox').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+document.getElementById('modal-admin').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
 </script>
 </body>
 </html>
