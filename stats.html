@@ -638,6 +638,15 @@ async function sendMessage() {
   }
 }
 
+<section id="admin-send-section">
+    <h2>Wyślij wiadomość do ucznia</h2>
+    <select id="user-select">
+        <option value="">Wybierz kod odbiorcy...</option>
+    </select>
+    <textarea id="admin-message" placeholder="Treść wiadomości..."></textarea>
+    <button onclick="sendMessageToUser()">Wyślij</button>
+</section>
+
 function openResetModal() { document.getElementById('modal-reset').classList.add('show'); }
 function closeResetModal() { document.getElementById('modal-reset').classList.remove('show'); }
 
@@ -677,6 +686,34 @@ function animateCount(id, target) {
     if(p<1) requestAnimationFrame(step);
   })(t0);
 }
+
+async function loadUsers() {
+    const response = await fetch('/api/get_users');
+    const users = await response.json();
+    const select = document.getElementById('user-select');
+    users.forEach(user => {
+        const opt = document.createElement('option');
+        opt.value = user.kod_odbiorcy;
+        opt.textContent = user.kod_odbiorcy;
+        select.appendChild(opt);
+    });
+}
+
+async function sendMessageToUser() {
+    const kod = document.getElementById('user-select').value;
+    const tresc = document.getElementById('admin-message').value;
+
+    const response = await fetch('/api/send_message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kod_odbiorcy: kod, tresc: tresc })
+    });
+
+    if (response.ok) alert('Wysłano!');
+}
+
+// Wywołaj loadUsers przy ładowaniu strony
+window.onload = loadUsers;
 
 function showAlert(msg){ const e=document.getElementById('db-alert'); e.innerText='⚠ '+msg; e.classList.add('show'); }
 function hideAlert(){ document.getElementById('db-alert').classList.remove('show'); }
