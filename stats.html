@@ -332,12 +332,15 @@ td { padding: 11px 16px; vertical-align: middle; }
         <button class="filter-pill" onclick="setFilter('dobrze')" id="pill-dobrze">😊 Dobrze</button>
         <button class="filter-pill" onclick="setFilter('zle')" id="pill-zle">😐 Źle</button>
         <button class="filter-pill" onclick="setFilter('fatalnie')" id="pill-fatalnie">😖 Fatalnie</button>
-        <input class="filter-input" id="search-input" placeholder="Szukaj klasy lub powodu..." oninput="renderTable()">
+        <input class="filter-input" id="search-input" placeholder="Szukaj klasy, kodu, powodu..." oninput="renderTable()">
         <select class="filter-select" id="sort-select" onchange="renderTable()">
           <option value="newest">Najnowsze</option>
           <option value="oldest">Najstarsze</option>
           <option value="class">Klasa A–Z</option>
         </select>
+        <input type="date" class="filter-input" id="date-from" style="max-width:148px;color-scheme:dark;" title="Od dnia" onchange="renderTable()">
+        <input type="date" class="filter-input" id="date-to" style="max-width:148px;color-scheme:dark;" title="Do dnia" onchange="renderTable()">
+        <button class="filter-pill" onclick="clearDateFilter()" title="Wyczyść filtr dat" style="white-space:nowrap; opacity:0.7;">✕ daty</button>
       </div>
       <div class="votes-table-wrap">
         <table>
@@ -518,10 +521,23 @@ function renderTable() {
   const tbody = document.getElementById('votes-tbody');
   const search = document.getElementById('search-input').value.toLowerCase();
   const sort = document.getElementById('sort-select').value;
+  const dateFrom = document.getElementById('date-from').value;
+  const dateTo = document.getElementById('date-to').value;
 
   let votes = [...rawVotes];
   if (activeFilter !== 'all') votes = votes.filter(v => v.nastroj === activeFilter);
   if (search) votes = votes.filter(v => (v.kto||'').toLowerCase().includes(search) || (v.powod||'').toLowerCase().includes(search) || (v.kod||'').toLowerCase().includes(search));
+
+  // Date filtering
+  if (dateFrom) {
+    const from = new Date(dateFrom + 'T00:00:00');
+    votes = votes.filter(v => v.kiedy && new Date(v.kiedy) >= from);
+  }
+  if (dateTo) {
+    const to = new Date(dateTo + 'T23:59:59');
+    votes = votes.filter(v => v.kiedy && new Date(v.kiedy) <= to);
+  }
+
   if (sort==='newest') votes.sort((a,b)=>new Date(b.kiedy)-new Date(a.kiedy));
   else if (sort==='oldest') votes.sort((a,b)=>new Date(a.kiedy)-new Date(b.kiedy));
   else if (sort==='class') votes.sort((a,b)=>(a.kto||'').localeCompare(b.kto||''));
@@ -542,10 +558,8 @@ function renderTable() {
       ? `<span class="fatal-alert-badge">⚠ ${streak}× z rzędu</span>`
       : '';
 
-    // Action button - poprawione cudzysłowy i przekazywanie KODU
-    const actionBtn = (isFatal || streak >= 2)
-      ? `<button class="btn-send-msg" onclick='openMsgModal(${JSON.stringify(v.kto || "?")}, ${JSON.stringify(v.kod || "")})'>✉ Wyślij</button>`
-      : `<span style="color:#333;font-size:0.75rem;font-family:'DM Mono',monospace;">—</span>`;
+    // Show send button for ALL entries
+    const actionBtn = `<button class="btn-send-msg" onclick='openMsgModal(${JSON.stringify(v.kto || "?")}, ${JSON.stringify(v.kod || "")})'>✉ Wyślij</button>`;
 
     return `<tr style="animation:rowIn 0.2s ${Math.min(i*0.025,0.4)}s ease both">
       <td><span class="td-class">${escapeHtml(v.kto||'—')}</span>${streakBadge}</td>
@@ -556,6 +570,12 @@ function renderTable() {
       <td>${actionBtn}</td>
     </tr>`;
   }).join('');
+}
+
+function clearDateFilter() {
+  document.getElementById('date-from').value = '';
+  document.getElementById('date-to').value = '';
+  renderTable();
 }
 
 function renderReasons() {
